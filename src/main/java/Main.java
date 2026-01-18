@@ -10,7 +10,14 @@ public class Main {
         do {
             System.out.print("$ ");
             String command = scanner.nextLine();
-            System.out.println(command + ": command not found");
+            switch (command) {
+                case "exit":
+                    alive = false;
+                    break;
+                default:
+                    System.out.println(command + ": command not found");
+                    break;
+            }
         }while(alive);
     }
 }
