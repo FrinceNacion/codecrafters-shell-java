@@ -15,6 +15,9 @@ public class Main {
             case "echo":
                 System.out.println("echo is a shell builtin");
                 break;
+            case "type":
+                System.out.println("type is a shell builtin");
+                break;
             default:
                 System.out.println(command + ": command not found");
                 break;
