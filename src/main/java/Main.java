@@ -19,7 +19,7 @@ public class Main {
                 System.out.println("type is a shell builtin");
                 break;
             default:
-                System.out.println(command + ": command not found");
+                System.out.println(command + ": not found");
                 break;
         }
     }
