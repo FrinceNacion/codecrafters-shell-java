@@ -72,7 +72,7 @@ public class Main {
 
         List<String> command = new ArrayList<>();
         command.add(program_name);
-        Arrays.stream(program_params.split(" ")).map(s -> command.add(s));
+        Arrays.stream(program_params.split(" ")).forEach(command::add);
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         try {
             Process process = processBuilder.start();
