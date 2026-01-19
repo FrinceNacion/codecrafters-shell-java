@@ -1,5 +1,7 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -76,7 +78,14 @@ public class Main {
         command.add(program_params);
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         try {
-            return processBuilder.start();
+            Process process = processBuilder.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line); // Output: Hello from Java
+                }
+            }
+            return process;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
