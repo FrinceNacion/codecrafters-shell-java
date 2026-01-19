@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class Main {
@@ -75,7 +72,7 @@ public class Main {
 
         List<String> command = new ArrayList<>();
         command.add(program_name);
-        command.add(program_params);
+        Arrays.stream(program_params.split(" ")).map(s -> command.add(s));
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         try {
             Process process = processBuilder.start();
