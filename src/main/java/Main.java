@@ -2,6 +2,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Stream;
@@ -13,50 +15,40 @@ public class Main {
     static String command;
     static String parameter;
 
-    static void list_files(){
-        for (int i = 0; i < path_environment_directories.length; i++) {
-            Path current_directory = Path.of(path_environment_directories[i]);
-            if (Files.exists(current_directory) && Files.isDirectory(current_directory)) {
-                try (Stream<Path> stream = Files.list(current_directory)) {
-                    stream.filter(Files::isRegularFile)
-                            .filter(Files::isExecutable)
-                            .map(Path::getFileName)
-                            .forEach(System.out::println);
-                } catch (IOException e) {
-                    System.out.println("Error");
-                    throw new RuntimeException(e);
-                }
+    private static Optional<Path> find_executable_file_in_PATH(String file_name){
+        Optional<Path> result = Optional.empty();
+        for(String current_path_raw : path_environment_directories){
+            Path current_path = Path.of(current_path_raw);
+            if (!Files.exists(current_path) && !Files.isDirectory(current_path)) {
+                continue;
             }
+
+            result = find_executable_file(file_name, current_path);
+            if (!result.equals(Optional.empty())){break;}
+        }
+        return result;
+    }
+
+    private static Optional<Path> find_executable_file(String file_name, Path directory){
+        try (Stream<Path> stream = Files.list(directory)) {
+            Optional<Path> file = stream.filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().equals(file_name))
+                    .filter(Files::isExecutable)
+                    .findFirst();
+            return file;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-        static String check_file_in_path(String command) {
-            Optional<Path> result = null;
-            for (String pathEnvironmentDirectory : path_environment_directories) {
-                Path current_directory = Path.of(pathEnvironmentDirectory);
-                if (!Files.exists(current_directory) && !Files.isDirectory(current_directory)) {
-                    continue;
-                }
-
-                try (Stream<Path> stream = Files.list(current_directory)) {
-                    Optional<Path> first = stream.filter(Files::isRegularFile)
-                            .filter(path -> path.getFileName().toString().equals(command))
-                            .filter(Files::isExecutable)
-                            .findFirst();
-                    if (!first.equals(Optional.empty())) {
-                        result = first;
-                        break;
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            return (result != null) ? command + " is " +result.get().toString() : command + ": not found";
-        }
+    // used in the type command
+    private static String type_command_file_finder(String command) {
+        Optional<Path> file = find_executable_file_in_PATH(command);
+        return (!file.equals(Optional.empty())) ? command + " is " +file.get().toString() : command + ": not found";
+    }
 
     // For the type command
-    public static void match_command(String command){
+    private static void type_command(String command){
         switch (command) {
             case "exit":
                 System.out.println("exit is a shell builtin");
@@ -68,8 +60,25 @@ public class Main {
                 System.out.println("type is a shell builtin");
                 break;
             default:
-                System.out.println(check_file_in_path(command));
+                System.out.println(type_command_file_finder(command));
                 break;
+        }
+    }
+
+    private static Process run_program(String program_name, String program_params){
+        Optional<Path> file = find_executable_file_in_PATH(program_name);
+        if (file.equals(Optional.empty())){
+            return null;
+        }
+
+        List<String> command = new ArrayList<>();
+        command.add(program_name);
+        command.add(program_params);
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        try {
+            return processBuilder.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -90,10 +99,12 @@ public class Main {
                     System.out.println(parameter);
                     break;
                 case "type":
-                    match_command(parameter.toLowerCase());
+                    type_command(parameter.toLowerCase());
                     break;
                 default:
-                    System.out.println(command + ": command not found");
+                    if(run_program(command, parameter) == null){
+                        System.out.println(command + ": command not found");
+                    }
                     break;
             }
         }while(alive);
