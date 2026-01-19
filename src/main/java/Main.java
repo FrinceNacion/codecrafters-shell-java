@@ -53,6 +53,9 @@ public class Main {
             case "exit":
                 System.out.println("exit is a shell builtin");
                 break;
+            case "pwd":
+                System.out.println("pwd is a shell builtin");
+                break;
             case "echo":
                 System.out.println("echo is a shell builtin");
                 break;
