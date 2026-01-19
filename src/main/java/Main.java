@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -88,6 +89,12 @@ public class Main {
         }
     }
 
+    private static String print_working_directory(){
+        Path current_relative_directory = Paths.get("");
+        String current_absolute_directory = current_relative_directory.toAbsolutePath().normalize().toString();
+        return current_absolute_directory;
+    }
+
     static void main(String[] args) throws Exception {
         scanner = new Scanner(System.in);
         boolean alive = true;
@@ -100,6 +107,9 @@ public class Main {
             switch (command) {
                 case "exit":
                     alive = false;
+                    break;
+                case "pwd":
+                    System.out.println(print_working_directory());
                     break;
                 case "echo":
                     System.out.println(parameter);
