@@ -109,6 +109,10 @@ public class Main {
             return;
         }
 
+        if (!new_current_path.isAbsolute()){
+            new_current_path = current_directory.resolve(new_current_path).normalize();
+        }
+
         if (!Files.isDirectory(new_current_path) && !Files.exists(new_current_path)){
             System.out.println("cd: "+new_current_path.toString()+": No such file or directory");
             return;
@@ -122,7 +126,6 @@ public class Main {
 
         // Handle relative paths
         current_directory = current_directory.resolve(new_current_path).normalize();
-        return;
     }
 
     static void main(String[] args) throws Exception {
