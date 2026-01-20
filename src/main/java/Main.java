@@ -14,6 +14,7 @@ public class Main {
     static String input;
     static String command;
     static String parameter;
+    static Path current_directory = Paths.get("").toAbsolutePath().normalize();
 
     private static Optional<Path> find_executable_file_in_PATH(String file_name){
         Optional<Path> result = Optional.empty();
@@ -56,6 +57,9 @@ public class Main {
             case "pwd":
                 System.out.println("pwd is a shell builtin");
                 break;
+            case "cd":
+                System.out.println("cd is a shell builtin");
+                break;
             case "echo":
                 System.out.println("echo is a shell builtin");
                 break;
@@ -93,9 +97,32 @@ public class Main {
     }
 
     private static String print_working_directory(){
-        Path current_relative_directory = Paths.get("");
-        String current_absolute_directory = current_relative_directory.toAbsolutePath().normalize().toString();
-        return current_absolute_directory;
+         return current_directory.toString();
+    }
+
+    private static void change_directory(String path){
+        Path new_current_path = Path.of(path).normalize();
+
+        // Handle user's home directory
+        if (new_current_path.toString().equals("~")){
+            current_directory = Path.of(System.getProperty("user.home"));
+            return;
+        }
+
+        if (!Files.isDirectory(new_current_path) && !Files.exists(new_current_path)){
+            System.out.println("cd: "+new_current_path.toString()+": No such file or directory");
+            return;
+        }
+
+        // Handle absolute paths
+        if (new_current_path.isAbsolute() || new_current_path.startsWith("/")){
+            current_directory = new_current_path.toAbsolutePath();
+            return;
+        }
+
+        // Handle relative paths
+        current_directory = current_directory.resolve(new_current_path).normalize();
+        return;
     }
 
     static void main(String[] args) throws Exception {
@@ -113,6 +140,9 @@ public class Main {
                     break;
                 case "pwd":
                     System.out.println(print_working_directory());
+                    break;
+                case "cd":
+                    change_directory(parameter);
                     break;
                 case "echo":
                     System.out.println(parameter);
