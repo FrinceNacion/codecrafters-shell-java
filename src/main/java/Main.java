@@ -105,7 +105,7 @@ public class Main {
 
         // Handle user's home directory
         if (new_current_path.toString().equals("~")){
-            current_directory = Path.of(System.getProperty("user.home"));
+            current_directory = Path.of(System.getProperty("java.home"));
             return;
         }
 
