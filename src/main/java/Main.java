@@ -130,25 +130,38 @@ public class Main {
         current_directory = current_directory.resolve(new_current_path).normalize();
     }
 
-    private static void echo_command(String params){
-        Pattern single_qoute_matcher = Pattern.compile("'((?:\\\\'|[^'])*)'");
-        String double_qoute_matcher = "\"[^\"]\"";
+    private static void echo_command(String params) {
+        List<String> to_print = new LinkedList<>();
+        boolean in_qoutes = false;
+        StringBuilder inside = new StringBuilder();
+        StringBuilder outside = new StringBuilder();
 
-        Matcher matcher = single_qoute_matcher.matcher(params);
-        // single qoute
-        if (matcher.find()){
-            matcher.reset();
-            matcher.results().map(item -> item.group(1)).forEach(str -> {
-                if(!str.isEmpty()){
-                    System.out.print(str);
-                    return;
+        for(char c : params.toCharArray()){
+            if (outside.length() >= 0){
+                to_print.add(outside.toString());
+                outside.setLength(0);
+            }
+            if (c == '\''){
+                if (in_qoutes){
+                    to_print.add(inside.toString());
+                    inside.setLength(0);
                 }
-                System.out.print(params.replaceAll("''", ""));
-            });
-            System.out.println("");
-            return;
+                if (outside.length() >= 0){
+                    to_print.add(outside.toString());
+                    outside.setLength(0);
+                }
+                in_qoutes = !in_qoutes;
+            } else if (in_qoutes) {
+                inside.append(c);
+            }else{
+                outside.append(c);
+            }
         }
-        System.out.println(params.replaceAll("\\s+", " "));
+
+        for (String txt : to_print){
+            System.out.print(txt);
+        }
+        System.out.println("");
     }
 
     static void main(String[] args) throws Exception {
