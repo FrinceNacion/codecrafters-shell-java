@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class Main {
@@ -128,6 +130,27 @@ public class Main {
         current_directory = current_directory.resolve(new_current_path).normalize();
     }
 
+    private static void echo_command(String params){
+        Pattern single_qoute_matcher = Pattern.compile("'((?:\\\\'|[^'])*)'");
+        String double_qoute_matcher = "\"[^\"]\"";
+
+        Matcher matcher = single_qoute_matcher.matcher(params);
+        // single qoute
+        if (matcher.find()){
+            matcher.reset();
+            matcher.results().map(item -> item.group(1)).forEach(str -> {
+                if(!str.isEmpty()){
+                    System.out.print(str);
+                    return;
+                }
+                System.out.print(params.replaceAll("''", ""));
+            });
+            System.out.println("");
+            return;
+        }
+        System.out.println(params.replaceAll("\\s+", " "));
+    }
+
     static void main(String[] args) throws Exception {
         scanner = new Scanner(System.in);
         boolean alive = true;
@@ -148,7 +171,7 @@ public class Main {
                     change_directory(parameter);
                     break;
                 case "echo":
-                    System.out.println(parameter);
+                    echo_command(parameter);
                     break;
                 case "type":
                     type_command(parameter.toLowerCase());
