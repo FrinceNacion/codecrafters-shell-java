@@ -6,8 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class Main {
@@ -82,7 +80,8 @@ public class Main {
 
         List<String> command = new ArrayList<>();
         command.add(program_name);
-        Arrays.stream(program_params.split(" ")).forEach(command::add);
+        command.add(parse_single_qoute(program_params));
+
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         try {
             Process process = processBuilder.start();
@@ -130,38 +129,42 @@ public class Main {
         current_directory = current_directory.resolve(new_current_path).normalize();
     }
 
-    private static void echo_command(String params) {
-        List<String> to_print = new LinkedList<>();
+
+    private static String parse_single_qoute(String str){
+        StringBuilder to_print = new StringBuilder();
         boolean in_qoutes = false;
         StringBuilder inside = new StringBuilder();
         StringBuilder outside = new StringBuilder();
 
-        for(char c : params.toCharArray()){
-            if (outside.length() >= 0){
-                to_print.add(outside.toString());
-                outside.setLength(0);
-            }
-            if (c == '\''){
+        for(char character : str.toCharArray()){
+            if (character == '\''){
                 if (in_qoutes){
-                    to_print.add(inside.toString());
+                    to_print.append(inside.toString());
                     inside.setLength(0);
                 }
-                if (outside.length() >= 0){
-                    to_print.add(outside.toString());
+                if (outside.length() > 0){
+                    to_print.append(outside.toString().replaceAll("\\s+", " "));
                     outside.setLength(0);
                 }
                 in_qoutes = !in_qoutes;
             } else if (in_qoutes) {
-                inside.append(c);
+                inside.append(character);
             }else{
-                outside.append(c);
+                outside.append(character);
             }
         }
-
-        for (String txt : to_print){
-            System.out.print(txt);
+        if (outside.length() > 0){
+            to_print.append(outside.toString().replaceAll("\\s+", " "));
+            outside.setLength(0);
         }
-        System.out.println("");
+        if (in_qoutes){
+            to_print.append(inside.toString());
+        }
+        return to_print.toString();
+    }
+
+    private static void echo_command(String params) {
+        System.out.println(parse_single_qoute(params));
     }
 
     static void main(String[] args) throws Exception {
@@ -184,7 +187,7 @@ public class Main {
                     change_directory(parameter);
                     break;
                 case "echo":
-                    echo_command(parameter);
+                    echo_command(parameter.toString());
                     break;
                 case "type":
                     type_command(parameter.toLowerCase());
