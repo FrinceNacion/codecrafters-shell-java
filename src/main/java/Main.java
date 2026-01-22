@@ -72,6 +72,7 @@ public class Main {
         }
     }
 
+
     private static Process run_program(String program_name, String program_params){
         Optional<Path> file = find_executable_file_in_PATH(program_name);
         if (file.equals(Optional.empty())){
@@ -80,7 +81,7 @@ public class Main {
 
         List<String> command = new ArrayList<>();
         command.add(program_name);
-        command.add(parse_single_qoute(program_params));
+        splitter(program_params).stream().filter(str -> !str.isBlank()).forEach(command::add);
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         try {
@@ -127,6 +128,41 @@ public class Main {
 
         // Handle relative paths
         current_directory = current_directory.resolve(new_current_path).normalize();
+    }
+
+    private static LinkedList<String> splitter(String str){
+        LinkedList<String> to_print = new LinkedList<>();
+        boolean in_qoutes = false;
+        StringBuilder inside = new StringBuilder();
+        StringBuilder outside = new StringBuilder();
+
+        for(char character : str.toCharArray()){
+            if (character == '\''){
+                if (in_qoutes && !inside.isEmpty()){
+                    to_print.add(inside.toString());
+                    inside.setLength(0);
+                }
+                if (!outside.isEmpty()){
+                    to_print.add(outside.toString().replaceAll("\\s+", " "));
+                    outside.setLength(0);
+                }
+                in_qoutes = !in_qoutes;
+            } else if (in_qoutes) {
+                inside.append(character);
+            }else{
+                outside.append(character);
+            }
+        }
+        if (!outside.isEmpty()){
+            to_print.add(outside.toString().replaceAll("\\s+", " "));
+            outside.setLength(0);
+        }
+        if (in_qoutes){
+            to_print.add(inside.toString());
+        }
+        System.out.println("TESTER: "+ to_print);
+        to_print.stream().filter(s -> !s.isBlank()).forEach(System.out::println);
+        return to_print;
     }
 
 
@@ -187,7 +223,8 @@ public class Main {
                     change_directory(parameter);
                     break;
                 case "echo":
-                    echo_command(parameter.toString());
+                    echo_command(parameter);
+                    splitter(parameter);
                     break;
                 case "type":
                     type_command(parameter.toLowerCase());
