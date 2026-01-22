@@ -160,8 +160,6 @@ public class Main {
         if (in_qoutes){
             to_print.add(inside.toString());
         }
-        System.out.println("TESTER: "+ to_print);
-        to_print.stream().filter(s -> !s.isBlank()).forEach(System.out::println);
         return to_print;
     }
 
@@ -224,7 +222,6 @@ public class Main {
                     break;
                 case "echo":
                     echo_command(parameter);
-                    splitter(parameter);
                     break;
                 case "type":
                     type_command(parameter.toLowerCase());
