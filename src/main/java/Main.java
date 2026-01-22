@@ -143,7 +143,7 @@ public class Main {
                     inside.setLength(0);
                 }
                 if (!outside.isEmpty()){
-                    to_print.add(outside.toString().replaceAll("\\s+", " "));
+                    Arrays.stream(outside.toString().replaceAll("\\s+", " ").split(" ")).forEach(to_print::add);
                     outside.setLength(0);
                 }
                 in_qoutes = !in_qoutes;
@@ -154,12 +154,13 @@ public class Main {
             }
         }
         if (!outside.isEmpty()){
-            to_print.add(outside.toString().replaceAll("\\s+", " "));
+            Arrays.stream(outside.toString().replaceAll("\\s+", " ").split(" ")).forEach(to_print::add);
             outside.setLength(0);
         }
         if (in_qoutes){
             to_print.add(inside.toString());
         }
+        //to_print.stream().filter(s -> !s.isBlank()).forEach(System.out::println);
         return to_print;
     }
 
