@@ -132,14 +132,20 @@ public class Main {
 
     private static LinkedList<String> splitter(String str){
         LinkedList<String> to_print = new LinkedList<>();
+        char qoute_type = '0';
         boolean in_qoutes = false;
         StringBuilder inside = new StringBuilder();
         StringBuilder outside = new StringBuilder();
 
+
         for(char character : str.toCharArray()){
-            if (character == '\''){
+            if((character == '\'' || character == '"') && qoute_type == '0'){
+                qoute_type = character;
+            }
+            if (character == qoute_type){
                 if (in_qoutes && !inside.isEmpty()){
                     to_print.add(inside.toString());
+                    qoute_type = '0';
                     inside.setLength(0);
                 }
                 if (!outside.isEmpty()){
@@ -160,21 +166,25 @@ public class Main {
         if (in_qoutes){
             to_print.add(inside.toString());
         }
-        //to_print.stream().filter(s -> !s.isBlank()).forEach(System.out::println);
         return to_print;
     }
 
 
     private static String parse_single_qoute(String str){
         StringBuilder to_print = new StringBuilder();
+        char qoute_type = '0';
         boolean in_qoutes = false;
         StringBuilder inside = new StringBuilder();
         StringBuilder outside = new StringBuilder();
 
         for(char character : str.toCharArray()){
-            if (character == '\''){
+            if((character == '\'' || character == '"') && qoute_type == '0'){
+                qoute_type = character;
+            }
+            if (character == qoute_type){
                 if (in_qoutes){
                     to_print.append(inside.toString());
+                    qoute_type = '0';
                     inside.setLength(0);
                 }
                 if (outside.length() > 0){
@@ -223,6 +233,7 @@ public class Main {
                     break;
                 case "echo":
                     echo_command(parameter);
+                    splitter(parameter);
                     break;
                 case "type":
                     type_command(parameter.toLowerCase());
