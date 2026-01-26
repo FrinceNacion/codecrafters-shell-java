@@ -81,7 +81,10 @@ public class Main {
 
         List<String> command = new ArrayList<>();
         command.add(program_name);
-        ParameterParser.getParameterList().stream().filter(str -> !str.isBlank()).forEach(command::add);
+        ParameterParser.getParameterList().stream()
+                .filter(str -> !str.isBlank())
+                .map(str -> str.replaceAll("\\\\\\s", " "))
+                .forEach(command::add);
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         try {

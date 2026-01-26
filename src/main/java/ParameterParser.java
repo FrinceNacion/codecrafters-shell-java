@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class ParameterParser {
@@ -5,7 +6,7 @@ public class ParameterParser {
     private static final StringBuilder parameterString = new StringBuilder();
 
     public static void parse(String parameter){
-        if (parameter.isEmpty() || parameter.isBlank()){
+        if (parameter.isBlank()){
             return;
         }
 
@@ -40,9 +41,8 @@ public class ParameterParser {
                 }
                 if (outside.length() > 0){
                     temp = outside.toString().replaceAll("(?<!\\\\)\\s+", " ");
-                    temp = temp.replaceAll("\\\\\\s", " ");
-                    getParameterString().append(temp);
-                    getParameterList().add(temp);
+                    getParameterString().append(temp.replaceAll("\\\\\\s", " "));
+                    Arrays.stream(temp.split("(?<!\\\\)\\s+")).forEach(getParameterList()::add);
                     outside.setLength(0);
                 }
                 in_qoutes = !in_qoutes;
@@ -57,9 +57,8 @@ public class ParameterParser {
         }
         if (outside.length() > 0){
             temp = outside.toString().replaceAll("(?<!\\\\)\\s+", " ");
-            temp = temp.replaceAll("\\\\\\s", " ");
-            getParameterString().append(temp);
-            getParameterList().add(temp);
+            getParameterString().append(temp.replaceAll("\\\\\\s", " "));
+            Arrays.stream(temp.split("(?<!\\\\)\\s+")).forEach(getParameterList()::add);
             outside.setLength(0);
         }
         if (in_qoutes){
