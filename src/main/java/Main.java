@@ -170,16 +170,26 @@ public class Main {
     }
 
 
-    private static String parse_single_qoute(String str){
+    private static String parse_qoutes(String str){
         StringBuilder to_print = new StringBuilder();
         char qoute_type = '0';
+        String temp;
+        boolean is_escaped = false;
         boolean in_qoutes = false;
         StringBuilder inside = new StringBuilder();
         StringBuilder outside = new StringBuilder();
 
         for(char character : str.toCharArray()){
+            if (is_escaped){
+                outside.append((character == ' ') ? "\\ " : character);
+                is_escaped = false;
+                continue;
+            }
             if((character == '\'' || character == '"') && qoute_type == '0'){
                 qoute_type = character;
+            }
+            if (character == '\\' && !in_qoutes) {
+                is_escaped = true;
             }
             if (character == qoute_type){
                 if (in_qoutes){
@@ -188,18 +198,23 @@ public class Main {
                     inside.setLength(0);
                 }
                 if (outside.length() > 0){
-                    to_print.append(outside.toString().replaceAll("\\s+", " "));
+                    temp = outside.toString().replaceAll("(?<!\\\\)\\s+", " ");
+                    to_print.append(temp.replaceAll("\\\\\\s", " "));
                     outside.setLength(0);
                 }
                 in_qoutes = !in_qoutes;
             } else if (in_qoutes) {
                 inside.append(character);
             }else{
+                if(is_escaped){
+                    continue;
+                }
                 outside.append(character);
             }
         }
         if (outside.length() > 0){
-            to_print.append(outside.toString().replaceAll("\\s+", " "));
+            temp = outside.toString().replaceAll("(?<!\\\\)\\s+", " ");
+            to_print.append(temp.replaceAll("\\\\\\s", " "));
             outside.setLength(0);
         }
         if (in_qoutes){
@@ -209,7 +224,7 @@ public class Main {
     }
 
     private static void echo_command(String params) {
-        System.out.println(parse_single_qoute(params));
+        System.out.println(parse_qoutes(params));
     }
 
     static void main(String[] args) throws Exception {
