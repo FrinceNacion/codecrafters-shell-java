@@ -81,7 +81,7 @@ public class Main {
 
         List<String> command = new ArrayList<>();
         command.add(program_name);
-        splitter(program_params).stream().filter(str -> !str.isBlank()).forEach(command::add);
+        ParameterParser.getParameterList().stream().filter(str -> !str.isBlank()).forEach(command::add);
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         try {
@@ -224,7 +224,7 @@ public class Main {
     }
 
     private static void echo_command(String params) {
-        System.out.println(parse_qoutes(params));
+        System.out.println(ParameterParser.getParameterString());
     }
 
     static void main(String[] args) throws Exception {
@@ -236,6 +236,7 @@ public class Main {
             String[] input_raw = input.split(" ", 2);
             command = input_raw[0].toLowerCase();
             parameter = (input_raw.length != 1) ? input_raw[1]: "";
+            ParameterParser.parse(parameter);
             switch (command) {
                 case "exit":
                     alive = false;
@@ -248,7 +249,6 @@ public class Main {
                     break;
                 case "echo":
                     echo_command(parameter);
-                    splitter(parameter);
                     break;
                 case "type":
                     type_command(parameter.toLowerCase());
