@@ -83,7 +83,6 @@ public class Main {
         command.add(program_name);
         ParameterParser.getParameterList().stream()
                 .filter(str -> !str.isBlank())
-                .map(str -> str.replaceAll("\\\\\\s", " "))
                 .forEach(command::add);
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
@@ -131,99 +130,6 @@ public class Main {
 
         // Handle relative paths
         current_directory = current_directory.resolve(new_current_path).normalize();
-    }
-
-    private static LinkedList<String> splitter(String str){
-        LinkedList<String> to_print = new LinkedList<>();
-        char qoute_type = '0';
-        boolean in_qoutes = false;
-        StringBuilder inside = new StringBuilder();
-        StringBuilder outside = new StringBuilder();
-
-
-        for(char character : str.toCharArray()){
-            if((character == '\'' || character == '"') && qoute_type == '0'){
-                qoute_type = character;
-            }
-            if (character == qoute_type){
-                if (in_qoutes && !inside.isEmpty()){
-                    to_print.add(inside.toString());
-                    qoute_type = '0';
-                    inside.setLength(0);
-                }
-                if (!outside.isEmpty()){
-                    Arrays.stream(outside.toString().replaceAll("\\s+", " ").split(" ")).forEach(to_print::add);
-                    outside.setLength(0);
-                }
-                in_qoutes = !in_qoutes;
-            } else if (in_qoutes) {
-                inside.append(character);
-            }else{
-                outside.append(character);
-            }
-        }
-        if (!outside.isEmpty()){
-            Arrays.stream(outside.toString().replaceAll("\\s+", " ").split(" ")).forEach(to_print::add);
-            outside.setLength(0);
-        }
-        if (in_qoutes){
-            to_print.add(inside.toString());
-        }
-        return to_print;
-    }
-
-
-    private static String parse_qoutes(String str){
-        StringBuilder to_print = new StringBuilder();
-        char qoute_type = '0';
-        String temp;
-        boolean is_escaped = false;
-        boolean in_qoutes = false;
-        StringBuilder inside = new StringBuilder();
-        StringBuilder outside = new StringBuilder();
-
-        for(char character : str.toCharArray()){
-            if (is_escaped){
-                outside.append((character == ' ') ? "\\ " : character);
-                is_escaped = false;
-                continue;
-            }
-            if((character == '\'' || character == '"') && qoute_type == '0'){
-                qoute_type = character;
-            }
-            if (character == '\\' && !in_qoutes) {
-                is_escaped = true;
-            }
-            if (character == qoute_type){
-                if (in_qoutes){
-                    to_print.append(inside.toString());
-                    qoute_type = '0';
-                    inside.setLength(0);
-                }
-                if (outside.length() > 0){
-                    temp = outside.toString().replaceAll("(?<!\\\\)\\s+", " ");
-                    to_print.append(temp.replaceAll("\\\\\\s", " "));
-                    outside.setLength(0);
-                }
-                in_qoutes = !in_qoutes;
-            } else if (in_qoutes) {
-                inside.append(character);
-            }else{
-                if(is_escaped){
-                    continue;
-                }
-                outside.append(character);
-            }
-        }
-        if (outside.length() > 0){
-            temp = outside.toString().replaceAll("(?<!\\\\)\\s+", " ");
-            to_print.append(temp.replaceAll("\\\\\\s", " "));
-            outside.setLength(0);
-        }
-        if (in_qoutes){
-            to_print.append(inside.toString());
-        }
-        return to_print.toString();
     }
 
     private static void echo_command(String params) {
