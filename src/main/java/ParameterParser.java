@@ -81,7 +81,9 @@ public class ParameterParser {
         Arrays.stream(getParameterString().toString()
                 .split(String.format("\\[Space-"+get_space_id()+"\\]")))
                 .forEach(getParameterList()::add);
-
+        temp =  getParameterString().toString().replaceAll(String.format("\\[Space-"+get_space_id()+"\\]"), "\s");
+        getParameterString().setLength(0);
+        getParameterString().append(temp);
     }
 
     public static LinkedList<String> getParameterList() {
