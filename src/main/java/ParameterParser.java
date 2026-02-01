@@ -8,6 +8,7 @@ public class ParameterParser {
     private static final LinkedList<String> parameterList = new LinkedList<>();
     private static final StringBuilder parameterString = new StringBuilder();
     private static final int id_num = new Random().nextInt();
+    private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n"};
 
     private static String encode_break(){
         return String.format("[Space-%d]", id_num).toString();
@@ -27,21 +28,34 @@ public class ParameterParser {
         char qoute_type = '0';
         boolean is_escaped = false;
         boolean in_qoutes = false;
-        String temp = "";
+        String temp_string = "";
+        StringBuilder temp_escaped_container = new StringBuilder();
         StringBuilder inside = new StringBuilder();
         StringBuilder outside = new StringBuilder();
 
 
         for(char character : parameter.toCharArray()){
             if (is_escaped){
-                outside.append((character == ' ') ? "\\ " : character);
+                if (in_qoutes){
+                    if (Arrays.stream(escapable_characters).toList().contains(character)){
+                        temp_escaped_container.setLength(0);
+                        temp_escaped_container.append(character);
+                    }
+                    inside.append(temp_escaped_container);
+                }else{
+                    outside.append((character == ' ') ? "\\ " : character);
+                }
                 is_escaped = false;
                 continue;
             }
             if ((character == '\'' || character == '"') && qoute_type == '0'){
                 qoute_type = character;
+                if (in_qoutes){
+                    temp_escaped_container.append(character);
+                    continue;
+                }
             }
-            if (character == '\\' && !in_qoutes) {
+            if (character == '\\' && qoute_type != '\'') {
                 is_escaped = true;
             }
             if (character == qoute_type){
@@ -51,10 +65,10 @@ public class ParameterParser {
                     inside.setLength(0);
                 }
                 if (outside.length() > 0){
-                    temp = outside.toString().replaceAll("(?<!\\\\)\\s+", encode_break());
-                    temp = temp.replaceAll("\\\\ ", " ");
-                    getParameterString().append(temp);
-                    //Arrays.stream(temp.split("(?<!\\\\)\\s+")).forEach(getParameterList()::add);
+                    temp_string = outside.toString().replaceAll("(?<!\\\\)\\s+", encode_break());
+                    temp_string = temp_string.replaceAll("\\\\ ", " ");
+                    getParameterString().append(temp_string);
+                    //Arrays.stream(temp_string.split("(?<!\\\\)\\s+")).forEach(getParameterList()::add);
                     outside.setLength(0);
                 }
                 in_qoutes = !in_qoutes;
@@ -68,10 +82,10 @@ public class ParameterParser {
             }
         }
         if (outside.length() > 0){
-            temp = outside.toString().replaceAll("(?<!\\\\)\\s+", encode_break());
-            temp = temp.replaceAll("\\\\ ", " ");
-            getParameterString().append(temp);
-            //Arrays.stream(temp.split("(?<!\\\\)\\s+")).forEach(getParameterList()::add);
+            temp_string = outside.toString().replaceAll("(?<!\\\\)\\s+", encode_break());
+            temp_string = temp_string.replaceAll("\\\\ ", " ");
+            getParameterString().append(temp_string);
+            //Arrays.stream(temp_string.split("(?<!\\\\)\\s+")).forEach(getParameterList()::add);
             outside.setLength(0);
         }
         if (in_qoutes){
@@ -81,9 +95,9 @@ public class ParameterParser {
         Arrays.stream(getParameterString().toString()
                 .split(String.format("\\[Space-"+get_space_id()+"\\]")))
                 .forEach(getParameterList()::add);
-        temp =  getParameterString().toString().replaceAll(String.format("\\[Space-"+get_space_id()+"\\]"), "\s");
+        temp_string =  getParameterString().toString().replaceAll(String.format("\\[Space-"+get_space_id()+"\\]"), "\s");
         getParameterString().setLength(0);
-        getParameterString().append(temp);
+        getParameterString().append(temp_string);
     }
 
     public static LinkedList<String> getParameterList() {
