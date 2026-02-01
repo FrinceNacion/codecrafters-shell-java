@@ -17,8 +17,6 @@ public class ParameterParser {
         return id_num;
     }
 
-
-
     public static void parse(String parameter){
         if (parameter.isBlank()){
             return;
@@ -28,7 +26,6 @@ public class ParameterParser {
         getParameterString().setLength(0);
         char qoute_type = '0';
         boolean is_escaped = false;
-        boolean is_break = false;
         boolean in_qoutes = false;
         String temp = "";
         StringBuilder inside = new StringBuilder();
@@ -55,6 +52,7 @@ public class ParameterParser {
                 }
                 if (outside.length() > 0){
                     temp = outside.toString().replaceAll("(?<!\\\\)\\s+", encode_break());
+                    temp = temp.replaceAll("\\\\ ", " ");
                     getParameterString().append(temp);
                     //Arrays.stream(temp.split("(?<!\\\\)\\s+")).forEach(getParameterList()::add);
                     outside.setLength(0);
@@ -71,6 +69,7 @@ public class ParameterParser {
         }
         if (outside.length() > 0){
             temp = outside.toString().replaceAll("(?<!\\\\)\\s+", encode_break());
+            temp = temp.replaceAll("\\\\ ", " ");
             getParameterString().append(temp);
             //Arrays.stream(temp.split("(?<!\\\\)\\s+")).forEach(getParameterList()::add);
             outside.setLength(0);
@@ -79,7 +78,9 @@ public class ParameterParser {
             getParameterString().append(inside.toString());
         }
 
-        Arrays.stream(getParameterString().toString().split(String.format("\\[Space-"+get_space_id()+"\\]"))).forEach(getParameterList()::add);
+        Arrays.stream(getParameterString().toString()
+                .split(String.format("\\[Space-"+get_space_id()+"\\]")))
+                .forEach(getParameterList()::add);
 
     }
 
