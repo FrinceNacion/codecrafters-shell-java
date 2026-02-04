@@ -37,7 +37,6 @@ public class ParameterParser {
             if (is_escaped){
                 if (in_qoutes){
                     boolean is_present =  Arrays.stream(escapable_characters).filter(c -> c.contains(character + "")).findFirst().isPresent();
-                    System.out.println(is_present);
                     if (is_present){
                         temp_escaped_container.setLength(0);
                         temp_escaped_container.append(character);
