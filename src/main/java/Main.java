@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
+
 public class Main {
     static String[] path_environment_directories = System.getenv("PATH").split(File.pathSeparator);
     static Scanner scanner;

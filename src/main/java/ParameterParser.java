@@ -1,8 +1,7 @@
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.regex.Pattern;
 
 public class ParameterParser {
     private static final LinkedList<String> parameterList = new LinkedList<>();
@@ -37,7 +36,9 @@ public class ParameterParser {
         for(char character : parameter.toCharArray()){
             if (is_escaped){
                 if (in_qoutes){
-                    if (Arrays.stream(escapable_characters).toList().contains(character)){
+                    boolean is_present =  Arrays.stream(escapable_characters).filter(c -> c.contains(character + "")).findFirst().isPresent();
+                    System.out.println(is_present);
+                    if (is_present){
                         temp_escaped_container.setLength(0);
                         temp_escaped_container.append(character);
                     }
@@ -57,6 +58,7 @@ public class ParameterParser {
             }
             if (character == '\\' && qoute_type != '\'') {
                 is_escaped = true;
+                continue;
             }
             if (character == qoute_type){
                 if (in_qoutes){
