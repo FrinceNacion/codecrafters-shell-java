@@ -24,7 +24,7 @@ public class ParameterParser {
 
         getParameterList().clear();
         getParameterString().setLength(0);
-        char qoute_type = '0';
+        String qoute_type = encode_break();
         boolean is_escaped = false;
         boolean in_qoutes = false;
         String temp_string = "";
@@ -36,7 +36,10 @@ public class ParameterParser {
         for(char character : parameter.toCharArray()){
             if (is_escaped){
                 if (in_qoutes){
-                    boolean is_present =  Arrays.stream(escapable_characters).filter(c -> c.contains(character + "")).findFirst().isPresent();
+                    boolean is_present =  Arrays.stream(escapable_characters)
+                            .filter(c -> c.contains(character + ""))
+                            .findFirst()
+                            .isPresent();
                     if (is_present){
                         temp_escaped_container.setLength(0);
                         temp_escaped_container.append(character);
@@ -48,21 +51,21 @@ public class ParameterParser {
                 is_escaped = false;
                 continue;
             }
-            if ((character == '\'' || character == '"') && qoute_type == '0'){
-                qoute_type = character;
+            if ((character == '\'' || character == '"') && qoute_type == encode_break()){
+                qoute_type = String.valueOf(character);
                 if (in_qoutes){
                     temp_escaped_container.append(character);
                     continue;
                 }
             }
-            if (character == '\\' && qoute_type != '\'') {
+            if (character == '\\' && qoute_type != "\'") {
                 is_escaped = true;
                 continue;
             }
-            if (character == qoute_type){
+            if (character == qoute_type.charAt(0)){
                 if (in_qoutes){
                     getParameterString().append(inside.toString());
-                    qoute_type = '0';
+                    qoute_type = encode_break();
                     inside.setLength(0);
                 }
                 if (outside.length() > 0){
