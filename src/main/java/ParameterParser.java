@@ -17,6 +17,10 @@ public class ParameterParser {
         return id_num;
     }
 
+    public static boolean is_escapable_within_double_qoute(char character){
+        return Arrays.stream(escapable_characters).anyMatch( c-> c.contains(character + ""));
+    }
+
     public static void parse(String parameter){
         if (parameter.isBlank()){
             return;
@@ -34,13 +38,10 @@ public class ParameterParser {
 
 
         for(char character : parameter.toCharArray()){
+            // For escaped characters
             if (is_escaped){
                 if (in_qoutes){
-                    boolean is_present =  Arrays.stream(escapable_characters)
-                            .filter(c -> c.contains(character + ""))
-                            .findFirst()
-                            .isPresent();
-                    if (is_present){
+                    if (is_escapable_within_double_qoute(character)){
                         temp_escaped_container.setLength(0);
                         temp_escaped_container.append(character);
                     }
@@ -51,23 +52,36 @@ public class ParameterParser {
                 is_escaped = false;
                 continue;
             }
-            if ((character == '\'' || character == '"') && qoute_type == encode_break()){
-                qoute_type = String.valueOf(character);
-                if (in_qoutes){
+            // For establishing the encountering qoute character outside and inside the qoute
+            if ((character == '\'' || character == '"') && qoute_type != encode_break()){
+                if (qoute_type.equals("'") && character != '\''){
+                    inside.append(character);
+                    continue;
+                }
+                if (qoute_type.equals("\"") && character == '\''){
+                    inside.append(character);
+                    continue;
+                }
+                if (in_qoutes && !qoute_type.equals("'")){
                     temp_escaped_container.append(character);
                     continue;
                 }
+                qoute_type = String.valueOf(character);
             }
-            if (character == '\\' && qoute_type != "\'") {
+            // For backslash to escape the following character
+            if (character == '\\' && !qoute_type.equals("'")) {
                 is_escaped = true;
                 continue;
             }
+            // For encountering the first qoute
             if (character == qoute_type.charAt(0)){
+                // Encountering the second qoute of the same type
                 if (in_qoutes){
                     getParameterString().append(inside.toString());
                     qoute_type = encode_break();
                     inside.setLength(0);
                 }
+                // Append the outside string before the first qoute
                 if (outside.length() > 0){
                     temp_string = outside.toString().replaceAll("(?<!\\\\)\\s+", encode_break());
                     temp_string = temp_string.replaceAll("\\\\ ", " ");
