@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.Random;
 
 public class ParameterParser {
-    private static final LinkedList<String> parameterList = new LinkedList<>();
-    private static final StringBuilder parameterString = new StringBuilder();
+    private final LinkedList<String> parameterList = new LinkedList<>();
+    private final StringBuilder parameterString = new StringBuilder();
     private static final int id_num = new Random().nextInt();
     private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n"};
 
@@ -21,7 +21,7 @@ public class ParameterParser {
         return Arrays.stream(escapable_characters).anyMatch( c-> c.contains(character + ""));
     }
 
-    public static void parse(String parameter){
+    public void parse(String parameter){
         if (parameter.isBlank()){
             return;
         }
@@ -116,17 +116,17 @@ public class ParameterParser {
 
         Arrays.stream(getParameterString().toString()
                 .split(String.format("\\[Space-"+get_space_id()+"\\]")))
-                .forEach(getParameterList()::add);
+                .forEach(this.getParameterList()::add);
         temp_string =  getParameterString().toString().replaceAll(String.format("\\[Space-"+get_space_id()+"\\]"), "\s");
         getParameterString().setLength(0);
         getParameterString().append(temp_string);
     }
 
-    public static LinkedList<String> getParameterList() {
+    public LinkedList<String> getParameterList() {
         return parameterList;
     }
 
-    public static StringBuilder getParameterString() {
+    public StringBuilder getParameterString() {
         return parameterString;
     }
 }

@@ -13,6 +13,8 @@ public class Main {
     static String[] path_environment_directories = System.getenv("PATH").split(File.pathSeparator);
     static Scanner scanner;
     static String input;
+    static ParameterParser parameter_parser = new ParameterParser();
+    static ParameterParser command_parser = new ParameterParser();
     static String command;
     static String parameter;
     static Path current_directory = Paths.get("").toAbsolutePath().normalize();
@@ -82,7 +84,7 @@ public class Main {
 
         List<String> command = new ArrayList<>();
         command.add(program_name);
-        ParameterParser.getParameterList().stream()
+        parameter_parser.getParameterList().stream()
                 .filter(str -> !str.isBlank())
                 .forEach(command::add);
 
@@ -134,8 +136,8 @@ public class Main {
     }
 
     private static void echo_command(String params) {
-        System.out.println(ParameterParser.getParameterString());
-        //ParameterParser.getParameterList().stream().forEach(System.out::println);
+        System.out.println(parameter_parser.getParameterString());
+        //parameter_parser.getParameterList().stream().forEach(System.out::println);
     }
 
     static void main(String[] args) throws Exception {
@@ -147,7 +149,7 @@ public class Main {
             String[] input_raw = input.split(" ", 2);
             command = input_raw[0].toLowerCase();
             parameter = (input_raw.length != 1) ? input_raw[1]: "";
-            ParameterParser.parse(parameter);
+            parameter_parser.parse(parameter);
             switch (command) {
                 case "exit":
                     alive = false;
@@ -165,6 +167,8 @@ public class Main {
                     type_command(parameter.toLowerCase());
                     break;
                 default:
+                    command_parser.parse(command);
+                    command = command_parser.getParameterString().toString();
                     if(run_program(command, parameter) == null){
                         System.out.println(command + ": command not found");
                     }
