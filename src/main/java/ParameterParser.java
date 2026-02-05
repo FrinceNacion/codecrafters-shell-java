@@ -54,15 +54,19 @@ public class ParameterParser {
             }
             // For establishing the encountering qoute character outside and inside the qoute
             if ((character == '\'' || character == '"') && qoute_type != encode_break()){
+                // To insert double qoute character inside a single qoute block without escaping
                 if (qoute_type.equals("'") && character != '\''){
                     inside.append(character);
                     continue;
                 }
+                // To insert single qoute character inside a double qoute block
+                // w/o escaping and establishing a single qoute block
                 if (qoute_type.equals("\"") && character == '\''){
                     inside.append(character);
                     continue;
                 }
-                if (in_qoutes && !qoute_type.equals("'")){
+
+                if (is_escaped && !qoute_type.equals("'")){
                     temp_escaped_container.append(character);
                     continue;
                 }

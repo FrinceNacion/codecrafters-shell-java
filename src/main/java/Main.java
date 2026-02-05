@@ -135,6 +135,7 @@ public class Main {
 
     private static void echo_command(String params) {
         System.out.println(ParameterParser.getParameterString());
+        //ParameterParser.getParameterList().stream().forEach(System.out::println);
     }
 
     static void main(String[] args) throws Exception {
