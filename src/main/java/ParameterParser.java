@@ -7,7 +7,7 @@ public class ParameterParser {
     private final LinkedList<String> parameterList = new LinkedList<>();
     private final StringBuilder parameterString = new StringBuilder();
     private static final int id_num = new Random().nextInt();
-    private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n", "'"};
+    private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n"};
 
     public static String[] split_raw_input(String raw_input){
         StringBuilder raw = new StringBuilder(raw_input);
@@ -90,6 +90,8 @@ public class ParameterParser {
                     if (is_escapable_within_double_qoute(character)){
                         temp_escaped_container.setLength(0);
                         temp_escaped_container.append(character);
+                    }else{
+                        temp_escaped_container.append(character);
                     }
                     inside.append(temp_escaped_container);
                 }else{
@@ -112,14 +114,11 @@ public class ParameterParser {
                     continue;
                 }
 
-                if (is_escaped && !qoute_type.equals("'")){
-                    temp_escaped_container.append(character);
-                    continue;
-                }
                 qoute_type = String.valueOf(character);
             }
             // For backslash to escape the following character
             if (character == '\\' && !qoute_type.equals("'")) {
+                temp_escaped_container.append(character);
                 is_escaped = true;
                 continue;
             }
