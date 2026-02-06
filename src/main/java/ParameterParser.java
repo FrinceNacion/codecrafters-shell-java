@@ -49,6 +49,7 @@ public class ParameterParser {
             if (character == ' ' && !in_qoutes){
                 raw.deleteCharAt(i);
                 raw.insert(i, encode_break());
+                break;
             }
         }
         //System.out.println(raw.toString());
@@ -94,6 +95,7 @@ public class ParameterParser {
                         temp_escaped_container.append(character);
                     }
                     inside.append(temp_escaped_container);
+                    temp_escaped_container.setLength(0);
                 }else{
                     outside.append((character == ' ') ? "\\ " : character);
                 }
