@@ -7,7 +7,7 @@ public class ParameterParser {
     private final LinkedList<String> parameterList = new LinkedList<>();
     private final StringBuilder parameterString = new StringBuilder();
     private static final int id_num = new Random().nextInt();
-    private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n"};
+    private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n", "'"};
 
     public static String[] split_raw_input(String raw_input){
         StringBuilder raw = new StringBuilder(raw_input);
