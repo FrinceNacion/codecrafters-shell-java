@@ -9,6 +9,52 @@ public class ParameterParser {
     private static final int id_num = new Random().nextInt();
     private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n"};
 
+    public static String[] split_raw_input(String raw_input){
+        StringBuilder raw = new StringBuilder(raw_input);
+        String qoute_type = encode_break();
+        boolean is_escaped = false;
+        boolean in_qoutes = false;
+        for (int i = 0; i < raw_input.toCharArray().length; i++) {
+            char character = raw.charAt(i);
+            if (is_escaped){
+                is_escaped = false;
+                continue;
+            }
+            if ((character == '\'' || character == '"') && qoute_type != encode_break()){
+                // To insert double qoute character inside a single qoute block without escaping
+                if (qoute_type.equals("'") && character != '\''){
+                    continue;
+                }
+                // To insert single qoute character inside a double qoute block
+                // w/o escaping and establishing a single qoute block
+                if (qoute_type.equals("\"") && character == '\''){
+                    continue;
+                }
+
+                qoute_type = String.valueOf(character);
+            }
+            if (character == '\\' && !qoute_type.equals("'")) {
+                is_escaped = true;
+                continue;
+            }
+            // For encountering the first qoute
+            if (character == qoute_type.charAt(0)){
+                // Encountering the second qoute of the same type
+                if (in_qoutes){
+                    qoute_type = encode_break();
+                }
+                in_qoutes = !in_qoutes;
+                continue;
+            }
+            if (character == ' ' && !in_qoutes){
+                raw.deleteCharAt(i);
+                raw.insert(i, encode_break());
+            }
+        }
+        //System.out.println(raw.toString());
+        return raw.toString().split("\\[Space-"+get_space_id()+"\\]", 2);
+    }
+
     private static String encode_break(){
         return String.format("[Space-%d]", id_num).toString();
     }

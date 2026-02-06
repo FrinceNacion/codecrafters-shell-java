@@ -77,8 +77,6 @@ public class Main {
 
 
     private static Process run_program(String program_name, String program_params){
-        command_parser.parse(program_name);
-        program_name = command_parser.getParameterString().toString();
         Optional<Path> file = find_executable_file_in_PATH(program_name);
         if (file.equals(Optional.empty())){
             return null;
@@ -97,7 +95,7 @@ public class Main {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    System.out.println(line); // Output: Hello from Java
+                    System.out.println(line);
                 }
             }
             return process;
@@ -149,8 +147,9 @@ public class Main {
         do {
             System.out.print("$ ");
             input = scanner.nextLine();
-            String[] input_raw = input.split(" ", 2);
-            command = input_raw[0].toLowerCase();
+            //ParameterParser.split_raw_input(input);
+            String[] input_raw = ParameterParser.split_raw_input(input);
+            command = input_raw[0];
             parameter = (input_raw.length != 1) ? input_raw[1]: "";
             parameter_parser.parse(parameter);
             switch (command) {
@@ -170,6 +169,8 @@ public class Main {
                     type_command(parameter.toLowerCase());
                     break;
                 default:
+                    command_parser.parse(command);
+                    command = command_parser.getParameterString().toString();
                     if(run_program(command, parameter) == null){
                         System.out.println(command + ": command not found");
                     }
