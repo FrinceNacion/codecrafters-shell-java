@@ -1,13 +1,34 @@
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 public class ParameterParser {
     private final LinkedList<String> parameterList = new LinkedList<>();
     private final StringBuilder parameterString = new StringBuilder();
     private static final int id_num = new Random().nextInt();
     private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n"};
+    private static final String[] redirection_commands = {"1>", ">", "2>", ">>"};
+
+    // Splits the parameters to 3 section and validate for redirection
+    // if validation fails, it returns null or an error if encountered.
+    public static String[] split_redirection_parameter(String parameter) throws ArrayIndexOutOfBoundsException{
+        String[] parameter_list = new String[3];
+        String[] temp = split_raw_input(parameter);
+
+        String executable_parameter = temp[0];
+        temp = split_raw_input(temp[1]);
+        String command = temp[0];
+        String output_parameter = temp[1];
+
+        boolean is_command_present_or_valid = Arrays.stream(redirection_commands).anyMatch(cmd -> cmd.equals(command));
+        if (!is_command_present_or_valid){
+            return null;
+        }
+
+        parameter_list[0] = executable_parameter;
+        parameter_list[1] = output_parameter;
+        parameter_list[2] = command;
+
+        return parameter_list;
+    }
 
     public static String[] split_raw_input(String raw_input){
         StringBuilder raw = new StringBuilder(raw_input);

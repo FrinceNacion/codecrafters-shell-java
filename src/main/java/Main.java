@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 
 public class Main {
-    static String[] path_environment_directories = System.getenv("PATH").split(File.pathSeparator);
     static Scanner scanner;
     static String input;
     static ParameterParser parameter_parser = new ParameterParser();
@@ -19,35 +18,10 @@ public class Main {
     static String parameter;
     static Path current_directory = Paths.get("").toAbsolutePath().normalize();
 
-    private static Optional<Path> find_executable_file_in_PATH(String file_name){
-        Optional<Path> result = Optional.empty();
-        for(String current_path_raw : path_environment_directories){
-            Path current_path = Path.of(current_path_raw);
-            if (!Files.exists(current_path) && !Files.isDirectory(current_path)) {
-                continue;
-            }
-
-            result = find_executable_file(file_name, current_path);
-            if (!result.equals(Optional.empty())){break;}
-        }
-        return result;
-    }
-
-    private static Optional<Path> find_executable_file(String file_name, Path directory){
-        try (Stream<Path> stream = Files.list(directory)) {
-            Optional<Path> file = stream.filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().equals(file_name))
-                    .filter(Files::isExecutable)
-                    .findFirst();
-            return file;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     // used in the type command
     private static String type_command_file_finder(String command) {
-        Optional<Path> file = find_executable_file_in_PATH(command);
+        Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
         return (!file.equals(Optional.empty())) ? command + " is " +file.get().toString() : command + ": not found";
     }
 
@@ -72,35 +46,6 @@ public class Main {
             default:
                 System.out.println(type_command_file_finder(command));
                 break;
-        }
-    }
-
-
-    private static Process run_program(String program_name, String program_params){
-        Optional<Path> file = find_executable_file_in_PATH(program_name);
-        if (file.equals(Optional.empty())){
-            return null;
-        }
-
-        List<String> command = new ArrayList<>();
-
-        command.add(program_name);
-        parameter_parser.getParameterList().stream()
-                .filter(str -> !str.isBlank())
-                .forEach(command::add);
-
-        ProcessBuilder processBuilder = new ProcessBuilder(command);
-        try {
-            Process process = processBuilder.start();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-                }
-            }
-            return process;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -136,8 +81,16 @@ public class Main {
         current_directory = current_directory.resolve(new_current_path).normalize();
     }
 
-    private static void echo_command(String params) {
-        System.out.println(parameter_parser.getParameterString());
+    private static void echo_command() {
+        String[] parameter_array = null;
+        try{
+            parameter_array = ParameterParser.split_redirection_parameter(parameter_parser.getParameterString().toString());
+            FileProcessor.redirect_stdout(parameter_array);
+        } catch (ArrayIndexOutOfBoundsException e){
+            System.out.println(parameter_parser.getParameterString());
+        } catch (IOException e){
+            System.out.println(e.getMessage());
+        }
         //parameter_parser.getParameterList().stream().forEach(System.out::println);
     }
 
@@ -163,7 +116,7 @@ public class Main {
                     change_directory(parameter);
                     break;
                 case "echo":
-                    echo_command(parameter);
+                    echo_command();
                     break;
                 case "type":
                     type_command(parameter.toLowerCase());
@@ -171,8 +124,22 @@ public class Main {
                 default:
                     command_parser.parse(command);
                     command = command_parser.getParameterString().toString();
-                    if(run_program(command, parameter) == null){
-                        System.out.println(command + ": command not found");
+                    try{
+                        String[] parameter_array = ParameterParser.split_redirection_parameter(parameter_parser.getParameterString().toString());
+                        FileProcessor.redirect_stdout(parameter_array);
+                    } catch (ArrayIndexOutOfBoundsException e){
+                        Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
+                        if (file.equals(Optional.empty())){
+                            System.out.println(command + ": command not found");
+                            break;
+                        }
+                        Process process = FileProcessor.run_program(command, parameter_parser.getParameterList());
+                        FileProcessor.print_output_from_file(process);
+                        break;
+                    }catch (RuntimeException e) {
+                        System.out.println(command +": "+ e.getMessage());
+                    }catch (IOException e){
+                        System.out.println(e.getMessage());
                     }
                     break;
             }
