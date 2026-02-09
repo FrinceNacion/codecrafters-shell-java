@@ -2,10 +2,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -85,13 +82,12 @@ public class FileProcessor {
         // check for executable
         Optional<Path> executable_file = find_executable_file_in_PATH(executable_parameter);
         if (executable_file.equals(Optional.empty())){
-            throw new RuntimeException(executable_parameter+": No such file or directory");
+            throw new NoSuchFileException(executable_parameter+": No such file or directory");
         }
         Process process = run_program(executable_file.get().toString(), new LinkedList<>());
 
         //Optional<Path> output_file = find_executable_file_in_PATH(output_parameter);
         Files.write(Path.of(output_parameter), process.getInputStream().readAllBytes());
-        System.out.println("Finished");
     }
 
 }

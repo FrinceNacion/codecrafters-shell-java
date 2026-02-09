@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -127,19 +128,18 @@ public class Main {
                     try{
                         String[] parameter_array = ParameterParser.split_redirection_parameter(parameter_parser.getParameterString().toString());
                         FileProcessor.redirect_stdout(parameter_array);
-                    } catch (ArrayIndexOutOfBoundsException e){
+                    }catch (NoSuchFileException e) {
+                        System.out.println(command +": "+ e.getMessage());
+                    }catch (IOException e){
+                        System.out.println(e.getMessage());
+                    }  catch (RuntimeException e) {
                         Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
-                        if (file.equals(Optional.empty())){
+                        if (file.equals(Optional.empty())) {
                             System.out.println(command + ": command not found");
                             break;
                         }
                         Process process = FileProcessor.run_program(command, parameter_parser.getParameterList());
                         FileProcessor.print_output_from_file(process);
-                        break;
-                    }catch (RuntimeException e) {
-                        System.out.println(command +": "+ e.getMessage());
-                    }catch (IOException e){
-                        System.out.println(e.getMessage());
                     }
                     break;
             }
