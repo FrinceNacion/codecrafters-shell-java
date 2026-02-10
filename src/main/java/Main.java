@@ -87,6 +87,8 @@ public class Main {
         try{
             parameter_array = ParameterParser.split_redirection_parameter(parameter_parser.getParameterString().toString());
             FileProcessor.redirect_stdout(parameter_array);
+        } catch (NoSuchFileException e){
+            System.out.println(command +": "+ e.getMessage());
         } catch (ArrayIndexOutOfBoundsException e){
             System.out.println(parameter_parser.getParameterString());
         } catch (IOException e){

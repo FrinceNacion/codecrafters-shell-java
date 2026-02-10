@@ -79,8 +79,15 @@ public class FileProcessor {
         String output_parameter = parameter_array[1];
         String command = parameter_array[2];
 
+        if (executable_parameter.charAt(0) == '\'' && executable_parameter.endsWith("'")){
+            String output_string = ParameterParser.parse_string(executable_parameter);
+            Files.write(Path.of(output_parameter), output_string.getBytes());
+            return;
+        }
+
         // check for executable
         Optional<Path> executable_file = find_executable_file_in_PATH(executable_parameter);
+
         if (executable_file.equals(Optional.empty())){
             throw new NoSuchFileException(executable_parameter+": No such file or directory");
         }
