@@ -1,0 +1,70 @@
+alr 2.1.0
+
+USAGE
+   alr [global options] <command> [command options] [<arguments>]
+
+   alr help [<command>|<topic>]
+
+ARGUMENTS
+    <command>     Command to execute               
+    <arguments>   List of arguments for the command
+
+GLOBAL OPTIONS
+   -c (--config=ARG)       Deprecated. See -s/--settings switch                                           
+   -s (--settings=DIR)     Override settings folder location                                              
+   -C (--chdir=DIR)        Run `alr` in the given directory                                               
+   -f (--force)            Keep going after a recoverable troublesome situation                           
+   -n (--non-interactive)  Assume default answers for all user prompts                                    
+   --format[FORMAT]        Use structured output for tables (JSON, TOML)                                  
+   --no-color              Disables colors in output. Default when NO_COLOR is defined in the environment.
+   --no-tty                Disables control characters in output                                          
+   --prefer-oldest         Prefer oldest versions instead of newest when resolving dependencies           
+   --version               Displays version and exits                                                     
+   -q                      Limit output to errors                                                         
+   -v                      Be more verbose (use twice for extra detail)                                   
+   -d (--debug[])          Enable debug-specific log messages                                             
+
+COMMANDS
+   General  
+   help          Shows help on the given command/topic                            
+   cache         Inspect and manage Alire's cache                                 
+   settings      List, Get, Set or Unset Alire settings options                   
+   config        Deprecated command. Please use `alr settings` instead.           
+   install       Manage installation prefixes                                     
+   toolchain     Select Alire's preferred toolchain                               
+   version       Show detailed version, configuration, and environment information
+ 
+   Index    
+   get           Fetch a published crate                                          
+   index         Manage indexes used by current configuration                     
+   search        Search for a string in names and properties of crates            
+   show          Display information about a crate version                        
+ 
+   Crate    
+   build         Build the library or executables of the crate                    
+   clean         Clean generated files or downloaded dependencies                 
+   edit          Start an editor with Alire build environment setup               
+   exec          Run the given command in the alire project context               
+   init          Create a new crate for an executable or library                  
+   pin           Pin dependencies to exact versions                               
+   printenv      Print the build environment variables                            
+   run           Launch an executable built by the crate                          
+   update        Update some or all dependencies to a newer version               
+   with          Add or remove dependencies                                       
+ 
+   Testing  
+   action        List or manually trigger action hooks                            
+   dev           Developer helpers                                                
+   test          Test the compilation of all or some releases                     
+ 
+   Publish  
+   publish       Help publishing a new version of a crate                         
+
+TOPICS
+   aliases           User defined command aliases                   
+   identifiers       Naming rules for crate and index names         
+   toolchains        Configuration and use of toolchains            
+   upgrading_alr     Notes on upgrading between major `alr` versions
+ALIASES
+   gnatcov       exec -P2 -- gnatcov  
+   gnatprove     exec -P1 -- gnatprove

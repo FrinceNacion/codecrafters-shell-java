@@ -132,7 +132,10 @@ public class Main {
                         FileProcessor.redirect_stdout(parameter_array);
                     }catch (NoSuchFileException e) {
                         System.out.println(command +": "+ e.getMessage());
-                    }catch (IOException e){
+                    }catch (NullPointerException e){
+                        // get error message
+                        continue;
+                    } catch (IOException e){
                         System.out.println(e.getMessage());
                     }  catch (RuntimeException e) {
                         Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
