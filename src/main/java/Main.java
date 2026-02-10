@@ -138,7 +138,7 @@ public class Main {
                         Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
                         if (file.equals(Optional.empty())) {
                             System.out.println(command + ": command not found");
-                            break;
+                            continue;
                         }
                         Process process = FileProcessor.run_program(command, parameter_parser.getParameterList());
                         FileProcessor.print_output_from_file(process);
