@@ -133,6 +133,7 @@ public class Main {
                     }catch (NoSuchFileException e) {
                         System.out.println(command +": "+ e.getMessage());
                     }catch (NullPointerException e){
+                        System.out.println("asd");
                         // get error message
                         continue;
                     } catch (IOException e){
