@@ -75,9 +75,6 @@ public class FileProcessor {
 
     public static void redirect_stdout(String[] parameter_array) throws IOException {
 
-        if (parameter_array == null){
-            throw new NullPointerException();
-        }
 
         String executable_parameter = parameter_array[0];
         String output_parameter = parameter_array[1];
