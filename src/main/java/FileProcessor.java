@@ -1,12 +1,12 @@
+import javax.management.RuntimeErrorException;
+import javax.management.RuntimeOperationsException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class FileProcessor {
@@ -50,6 +50,7 @@ public class FileProcessor {
                 .forEach(command::add);
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
+
         try {
             Process process = processBuilder.start();
             return process;
@@ -73,29 +74,60 @@ public class FileProcessor {
 
     }
 
-    public static void redirect_stdout(String[] parameter_array) throws IOException {
-
+    public static void redirect_stdout(String command,String[] parameter_array) throws IOException, RuntimeErrorException {
+        if (parameter_array == null){
+            throw new NullPointerException();
+        }
+        LinkedList<String> parameters = new LinkedList<>();
+        ParameterParser parameterParser = new ParameterParser();
+        Process process;
 
         String executable_parameter = parameter_array[0];
-        String output_parameter = parameter_array[1];
-        String command = parameter_array[2];
+        String output_parameter = parameter_array[1].strip();
 
-        if (executable_parameter.charAt(0) == '\'' && executable_parameter.endsWith("'")){
-            String output_string = ParameterParser.parse_string(executable_parameter);
-            Files.write(Path.of(output_parameter), output_string.getBytes());
+        //System.out.println("EXEC: "+executable_parameter);
+        //System.out.println("OUTPUT: "+output_parameter);
+
+        Path output_path = Path.of(output_parameter);
+        Path output_parent = Path.of(""), output_file = output_path.getFileName();
+        if (output_path.getParent() != null){
+            output_parent = output_path.getParent();
+        }
+
+        if (output_parent != null && !Files.exists(output_parent)){
+            Files.createDirectories(output_parent);
+        }
+
+        output_path = output_parent.resolve(output_file);
+
+        if (executable_parameter.startsWith("'") && executable_parameter.endsWith("'")){
+            parameterParser.parse(executable_parameter);
+            String output_string = parameterParser.getParameterString().toString();
+            Files.writeString(output_path, output_string);
             return;
         }
 
         // check for executable
-        Optional<Path> executable_file = find_executable_file_in_PATH(executable_parameter);
-
-        if (executable_file.equals(Optional.empty())){
-            throw new NoSuchFileException(executable_parameter+": No such file or directory");
+        if (command.equals("echo")){
+            Optional<Path> executable_file = find_executable_file_in_PATH(executable_parameter);
+            command = executable_file.get().toString();
+        }else{
+            parameterParser.parse(executable_parameter);
+            parameters = parameterParser.getParameterList();
         }
-        Process process = run_program(executable_file.get().toString(), new LinkedList<>());
 
-        //Optional<Path> output_file = find_executable_file_in_PATH(output_parameter);
-        Files.write(Path.of(output_parameter), process.getInputStream().readAllBytes());
+        /**if (executable_file.equals(Optional.empty())){
+            throw new NoSuchFileException(executable_parameter+": No such file or directory");
+        }**/
+
+
+        process = run_program(command, parameters);
+        if (process.exitValue() != 0) {
+            String error = new String(process.getErrorStream().readAllBytes());
+            throw new IllegalThreadStateException(command+": No such file or directory");
+        }
+
+        Files.write(output_path, process.getInputStream().readAllBytes());
     }
 
 }

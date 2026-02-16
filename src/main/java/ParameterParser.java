@@ -11,24 +11,26 @@ public class ParameterParser {
     // if validation fails, it returns null or an error if encountered.
     public static String[] split_redirection_parameter(String parameter) throws ArrayIndexOutOfBoundsException{
         String[] parameter_list = new String[3];
-        String[] temp = split_raw_input(parameter);
+        int index = Math.max(parameter.indexOf(" > "), parameter.indexOf(" 1> "));
 
-        String executable_parameter = temp[0];
-        temp = split_raw_input(temp[1]);
-        String command = temp[0];
-        String output_parameter = temp[1];
+        if (index == -1){
+            throw new ArrayIndexOutOfBoundsException();
+        }
 
-        boolean is_command_present_or_valid = Arrays.asList(redirection_commands).contains(command);
+        String executable_parameter = parameter.substring(0, index);
+        String output_parameter = parameter.substring(index+3);
+
+        /**boolean is_command_present_or_valid = Arrays.asList(redirection_commands).contains(command);
         if (!is_command_present_or_valid){
             return null;
-        }
+        }**/
 
         parameter_list[0] = executable_parameter;
         parameter_list[1] = output_parameter;
-        parameter_list[2] = command;
 
         return parameter_list;
     }
+
 
     public static String[] split_raw_input(String raw_input){
         StringBuilder raw = new StringBuilder(raw_input);

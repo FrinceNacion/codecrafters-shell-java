@@ -1,13 +1,10 @@
-import java.io.BufferedReader;
-import java.io.File;
+import javax.management.RuntimeErrorException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
 
 public class Main {
@@ -50,7 +47,7 @@ public class Main {
         }
     }
 
-    private static String print_working_directory(){
+    private static String working_directory(){
          return current_directory.toString();
     }
 
@@ -85,8 +82,8 @@ public class Main {
     private static void echo_command() {
         String[] parameter_array = null;
         try{
-            parameter_array = ParameterParser.split_redirection_parameter(parameter_parser.getParameterString().toString());
-            FileProcessor.redirect_stdout(parameter_array);
+            parameter_array = ParameterParser.split_redirection_parameter(parameter);
+            FileProcessor.redirect_stdout(command ,parameter_array);
         } catch (NoSuchFileException e){
             System.out.println(command +": "+ e.getMessage());
         } catch (ArrayIndexOutOfBoundsException e){
@@ -101,7 +98,7 @@ public class Main {
         scanner = new Scanner(System.in);
         boolean alive = true;
         do {
-            System.out.print("$ ");
+             System.out.print("$ ");
             input = scanner.nextLine();
             //ParameterParser.split_raw_input(input);
             String[] input_raw = ParameterParser.split_raw_input(input);
@@ -113,7 +110,7 @@ public class Main {
                     alive = false;
                     break;
                 case "pwd":
-                    System.out.println(print_working_directory());
+                    System.out.println(working_directory());
                     break;
                 case "cd":
                     change_directory(parameter);
@@ -128,16 +125,11 @@ public class Main {
                     command_parser.parse(command);
                     command = command_parser.getParameterString().toString();
                     try{
-                        String[] parameter_array = ParameterParser.split_redirection_parameter(parameter_parser.getParameterString().toString());
-                        FileProcessor.redirect_stdout(parameter_array);
-                    }catch (NoSuchFileException e) {
-                        System.out.println(command +": "+ e.getMessage());
-                    }catch (NullPointerException e){
-                        // get error message
-                        continue;
-                    } catch (IOException e){
-                        System.out.println(e.getMessage());
-                    }  catch (RuntimeException e) {
+                        String[] parameter_array = ParameterParser.split_redirection_parameter(parameter);
+                        FileProcessor.redirect_stdout(command, parameter_array);
+                    } catch (IllegalThreadStateException e){
+                        System.out.println(command+": "+e.getLocalizedMessage());
+                    } catch (RuntimeException e) {
                         Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
                         if (file.equals(Optional.empty())) {
                             System.out.println(command + ": command not found");
