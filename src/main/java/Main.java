@@ -86,6 +86,8 @@ public class Main {
             FileProcessor.redirect_stdout(command ,parameter_array);
         } catch (NoSuchFileException e){
             System.out.println(command +": "+ e.getMessage());
+        } catch (InterruptedException e){
+            System.out.println("Interrupted");
         } catch (ArrayIndexOutOfBoundsException e){
             System.out.println(parameter_parser.getParameterString());
         } catch (IOException e){
@@ -128,7 +130,9 @@ public class Main {
                         String[] parameter_array = ParameterParser.split_redirection_parameter(parameter);
                         FileProcessor.redirect_stdout(command, parameter_array);
                     } catch (IllegalThreadStateException e){
-                        System.out.println(command+": "+e.getLocalizedMessage());
+                        System.out.println(e.getMessage());
+                    } catch (InterruptedException e){
+                        System.out.println("Interrupted");
                     } catch (RuntimeException e) {
                         Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
                         if (file.equals(Optional.empty())) {

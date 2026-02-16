@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 public class FileProcessor {
@@ -74,7 +75,7 @@ public class FileProcessor {
 
     }
 
-    public static void redirect_stdout(String command,String[] parameter_array) throws IOException, RuntimeErrorException {
+    public static void redirect_stdout(String command,String[] parameter_array) throws IOException, IllegalThreadStateException, InterruptedException {
         if (parameter_array == null){
             throw new NullPointerException();
         }
@@ -84,9 +85,6 @@ public class FileProcessor {
 
         String executable_parameter = parameter_array[0];
         String output_parameter = parameter_array[1].strip();
-
-        //System.out.println("EXEC: "+executable_parameter);
-        //System.out.println("OUTPUT: "+output_parameter);
 
         Path output_path = Path.of(output_parameter);
         Path output_parent = Path.of(""), output_file = output_path.getFileName();
@@ -116,18 +114,13 @@ public class FileProcessor {
             parameters = parameterParser.getParameterList();
         }
 
-        /**if (executable_file.equals(Optional.empty())){
-            throw new NoSuchFileException(executable_parameter+": No such file or directory");
-        }**/
-
-
         process = run_program(command, parameters);
-        if (process.exitValue() != 0) {
-            String error = new String(process.getErrorStream().readAllBytes());
-            throw new IllegalThreadStateException(command+": No such file or directory");
-        }
-
         Files.write(output_path, process.getInputStream().readAllBytes());
+        int exit_value = process.waitFor();
+        if (exit_value!= 0){
+            String error = new String(process.getErrorStream().readAllBytes());
+            throw new IllegalThreadStateException(error.strip());
+        }
     }
 
 }
