@@ -1,5 +1,6 @@
 import javax.management.RuntimeErrorException;
 import javax.management.RuntimeOperationsException;
+import javax.print.attribute.standard.PrinterMessageFromOperator;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +61,17 @@ public class FileProcessor {
         }
     }
 
+    public static void print_error_from_file(Process process){
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void print_output_from_file(Process process){
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
@@ -71,8 +83,21 @@ public class FileProcessor {
         }
     }
 
-    public static void handle_redirection(){
+    private static void stdout(Process process, Path output_path, Optional<String> string_output) throws IOException, InterruptedException {
+        if (string_output.isPresent()){
+            Files.writeString(output_path, string_output.get());
+            return;
+        }
 
+        Files.write(output_path, process.getInputStream().readAllBytes());
+        int exit_value = process.waitFor();
+        if (exit_value != 0){
+            String error = new String(process.getErrorStream().readAllBytes());
+            if (error.isEmpty()){
+                return;
+            }
+            throw new IllegalThreadStateException(error.strip());
+        }
     }
 
     public static void redirect_stdout(String command,String[] parameter_array) throws IOException, IllegalThreadStateException, InterruptedException {
@@ -88,6 +113,7 @@ public class FileProcessor {
 
         Path output_path = Path.of(output_parameter);
         Path output_parent = Path.of(""), output_file = output_path.getFileName();
+
         if (output_path.getParent() != null){
             output_parent = output_path.getParent();
         }
@@ -101,7 +127,69 @@ public class FileProcessor {
         if (executable_parameter.startsWith("'") && executable_parameter.endsWith("'")){
             parameterParser.parse(executable_parameter);
             String output_string = parameterParser.getParameterString().toString();
-            Files.writeString(output_path, output_string);
+            stdout(null, output_path, Optional.of(output_string));
+            return;
+        }
+
+        // check for executable
+        if (command.equals("echo")){
+            Optional<Path> executable_file = find_executable_file_in_PATH(executable_parameter);
+            try{
+                command = executable_file.get().toString();
+            } catch (NoSuchElementException e){
+
+            }
+        }else{
+            parameterParser.parse(executable_parameter);
+            parameters = parameterParser.getParameterList();
+        }
+
+        process = run_program(command, parameters);
+        stdout(process, output_path, Optional.empty());
+    }
+
+    private static void stderr(Process process, Path output_path, Optional<String> string_output) throws IOException, InterruptedException {
+        if (string_output.isPresent()){
+            System.out.println(string_output.get());
+            Files.writeString(output_path, "");
+            return;
+        }
+
+        int exit_value = process.waitFor();
+        if (exit_value != 0){
+            Files.write(output_path, process.getErrorStream().readAllBytes());
+        }
+        print_output_from_file(process);
+    }
+
+    private static void redirect_stderr(String command,String[] parameter_array) throws IOException, InterruptedException {
+        if (parameter_array == null){
+            throw new NullPointerException();
+        }
+        LinkedList<String> parameters = new LinkedList<>();
+        ParameterParser parameterParser = new ParameterParser();
+        Process process;
+
+        String executable_parameter = parameter_array[0];
+        String output_parameter = parameter_array[1].strip();
+
+        Path output_path = Path.of(output_parameter);
+        Path output_parent = Path.of(""), output_file = output_path.getFileName();
+
+        if (output_path.getParent() != null){
+            output_parent = output_path.getParent();
+        }
+
+        if (output_parent != null && !Files.exists(output_parent)){
+            Files.createDirectories(output_parent);
+        }
+
+        output_path = output_parent.resolve(output_file);
+
+        if (executable_parameter.startsWith("'") && executable_parameter.endsWith("'")){
+            parameterParser.parse(executable_parameter);
+            String output_string = parameterParser.getParameterString().toString();
+            stderr(null, output_path, Optional.of(output_string));
             return;
         }
 
@@ -115,12 +203,19 @@ public class FileProcessor {
         }
 
         process = run_program(command, parameters);
-        Files.write(output_path, process.getInputStream().readAllBytes());
-        int exit_value = process.waitFor();
-        if (exit_value!= 0){
-            String error = new String(process.getErrorStream().readAllBytes());
-            throw new IllegalThreadStateException(error.strip());
+        stderr(process, output_path, Optional.empty());
+    }
+
+    public static void redirect(String command, String[] parameter_array) throws IOException, InterruptedException {
+        String redirect_type = parameter_array[2];
+        if (redirect_type.equals(">") || redirect_type.equals("1>")){
+            redirect_stdout(command, parameter_array);
+        }else if (redirect_type.equals(">>") || redirect_type.equals("2>")){
+            redirect_stderr(command, parameter_array);
+        }else{
+            System.out.println("Type of redirect not detected");
         }
     }
+
 
 }

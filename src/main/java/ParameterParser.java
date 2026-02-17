@@ -11,7 +11,9 @@ public class ParameterParser {
     // if validation fails, it returns null or an error if encountered.
     public static String[] split_redirection_parameter(String parameter) throws ArrayIndexOutOfBoundsException{
         String[] parameter_list = new String[3];
-        int index = Math.max(parameter.indexOf(" > "), parameter.indexOf(" 1> "));
+        int redirect_stdout_command = Math.max(parameter.indexOf("\s>\s"), parameter.indexOf(" 1> "));
+        int redirect_stderr_command = Math.max(parameter.indexOf(" 2> "), parameter.indexOf(" >> "));
+        int index = Math.max(redirect_stdout_command, redirect_stderr_command);
 
         if (index == -1){
             throw new ArrayIndexOutOfBoundsException();
@@ -27,6 +29,7 @@ public class ParameterParser {
 
         parameter_list[0] = executable_parameter;
         parameter_list[1] = output_parameter;
+        parameter_list[2] = parameter.substring(index, index+3).strip();
 
         return parameter_list;
     }
