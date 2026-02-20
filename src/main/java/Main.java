@@ -102,7 +102,7 @@ public class Main {
         scanner = new Scanner(System.in);
         boolean alive = true;
         do {
-             System.out.print("$ ");
+            System.out.print("$ ");
             input = scanner.nextLine();
             //ParameterParser.split_raw_input(input);
             String[] input_raw = ParameterParser.split_raw_input(input);

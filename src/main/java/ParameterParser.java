@@ -5,22 +5,28 @@ public class ParameterParser {
     private final StringBuilder parameterString = new StringBuilder();
     private static final int id_num = new Random().nextInt();
     private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n"};
-    private static final String[] redirection_commands = {"1>", ">", "2>", ">>"};
+    private static final String[] redirection_commands = {" 1> ", "\s>\s", " 2> ", " 1>> ", " >> "};
 
     // Splits the parameters to 3 section and validate for redirection
     // if validation fails, it returns null or an error if encountered.
     public static String[] split_redirection_parameter(String parameter) throws ArrayIndexOutOfBoundsException{
         String[] parameter_list = new String[3];
-        int redirect_stdout_command = Math.max(parameter.indexOf("\s>\s"), parameter.indexOf(" 1> "));
-        int redirect_stderr_command = Math.max(parameter.indexOf(" 2> "), parameter.indexOf(" >> "));
-        int index = Math.max(redirect_stdout_command, redirect_stderr_command);
+        int index = -1;
+
+        for (int i = 0; i < redirection_commands.length; i++) {
+            index = parameter.indexOf(redirection_commands[i]);
+
+            if (index != -1){
+                break;
+            }
+        }
 
         if (index == -1){
             throw new ArrayIndexOutOfBoundsException();
         }
 
         String executable_parameter = parameter.substring(0, index);
-        String output_parameter = parameter.substring(index+3);
+        String output_parameter = parameter.substring(index).stripLeading().split(" ", 2)[1];
 
         /**boolean is_command_present_or_valid = Arrays.asList(redirection_commands).contains(command);
         if (!is_command_present_or_valid){
@@ -29,7 +35,7 @@ public class ParameterParser {
 
         parameter_list[0] = executable_parameter;
         parameter_list[1] = output_parameter;
-        parameter_list[2] = parameter.substring(index, index+3).strip();
+        parameter_list[2] = parameter.substring(index).stripLeading().split(" ", 2)[0];
 
         return parameter_list;
     }
