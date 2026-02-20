@@ -5,7 +5,7 @@ public class ParameterParser {
     private final StringBuilder parameterString = new StringBuilder();
     private static final int id_num = new Random().nextInt();
     private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n"};
-    private static final String[] redirection_commands = {" 1> ", "\s>\s", " 2> ", " 1>> ", " >> "};
+    private static final String[] redirection_commands = {" 1> ", "\s>\s", " 2> ", " 1>> ", " >> ", " 2>> "};
 
     // Splits the parameters to 3 section and validate for redirection
     // if validation fails, it returns null or an error if encountered.

@@ -164,21 +164,28 @@ public class FileProcessor {
         stdout(process, output_path, Optional.empty(), is_append);
     }
 
-    private static void stderr(Process process, Path output_path, Optional<String> string_output) throws IOException, InterruptedException {
+    private static void stderr(Process process, Path output_path, Optional<String> string_output, boolean is_append) throws IOException, InterruptedException {
         if (string_output.isPresent()){
             System.out.println(string_output.get());
             Files.writeString(output_path, "");
             return;
         }
 
+        ByteArrayOutputStream to_write = new ByteArrayOutputStream();
+        to_write.write("".getBytes());
+        if (is_append && Files.exists(output_path)){
+            to_write.write(Files.readAllBytes(output_path));
+        }
+
         int exit_value = process.waitFor();
         if (exit_value != 0){
-            Files.write(output_path, process.getErrorStream().readAllBytes());
+            to_write.write(process.getErrorStream().readAllBytes());
+            Files.write(output_path, to_write.toByteArray());
         }
         print_output_from_file(process);
     }
 
-    private static void redirect_stderr(String command,String[] parameter_array) throws IOException, InterruptedException {
+    private static void redirect_stderr(String command,String[] parameter_array, boolean is_append) throws IOException, InterruptedException {
         if (parameter_array == null){
             throw new NullPointerException();
         }
@@ -206,7 +213,7 @@ public class FileProcessor {
         if (in_qoutes){
             parameterParser.parse(executable_parameter);
             String output_string = parameterParser.getParameterString().toString();
-            stderr(null, output_path, Optional.of(output_string));
+            stderr(null, output_path, Optional.of(output_string), is_append);
             return;
         }
 
@@ -220,17 +227,19 @@ public class FileProcessor {
         }
 
         process = run_program(command, parameters);
-        stderr(process, output_path, Optional.empty());
+        stderr(process, output_path, Optional.empty(), is_append);
     }
 
     public static void redirect(String command, String[] parameter_array) throws IOException, InterruptedException {
         String redirect_type = parameter_array[2];
         if (redirect_type.equals(">") || redirect_type.equals("1>")){
             redirect_stdout(command, parameter_array, false);
-        }else if (redirect_type.equals("2>")){
-            redirect_stderr(command, parameter_array);
-        }else if (redirect_type.equals("1>>") || redirect_type.equals(">>")){
+        } else if (redirect_type.equals("2>")){
+            redirect_stderr(command, parameter_array, false);
+        } else if (redirect_type.equals("1>>") || redirect_type.equals(">>")){
             redirect_stdout(command, parameter_array, true);
+        } else if (redirect_type.equals("2>>")){
+            redirect_stderr(command, parameter_array, true);
         } else{
             System.out.println("Type of redirect not detected");
         }
