@@ -1,20 +1,12 @@
-import javax.management.RuntimeErrorException;
-import javax.management.RuntimeOperationsException;
-import javax.print.attribute.standard.PrinterMessageFromOperator;
+
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
-
-import static java.nio.file.StandardOpenOption.CREATE;
 
 public class FileProcessor {
     static String[] path_environment_directories = System.getenv("PATH").split(File.pathSeparator);
-    // TODO: migrate file-related functions here
+
     private static Optional<Path> find_executable_file(String file_name, Path directory){
         try (Stream<Path> stream = Files.list(directory)) {
             Optional<Path> file = stream.filter(Files::isRegularFile)
@@ -244,6 +236,4 @@ public class FileProcessor {
             System.out.println("Type of redirect not detected");
         }
     }
-
-
 }

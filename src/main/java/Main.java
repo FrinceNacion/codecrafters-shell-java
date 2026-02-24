@@ -1,4 +1,10 @@
-import javax.management.RuntimeErrorException;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.impl.DefaultParser;
+import org.jline.reader.impl.completer.StringsCompleter;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -20,7 +26,7 @@ public class Main {
     // used in the type command
     private static String type_command_file_finder(String command) {
         Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
-        return (!file.equals(Optional.empty())) ? command + " is " +file.get().toString() : command + ": not found";
+        return file.map(path -> command + " is " + path).orElseGet(() -> command + ": not found");
     }
 
     // For the type command
@@ -65,7 +71,7 @@ public class Main {
         }
 
         if (!Files.isDirectory(new_current_path) && !Files.exists(new_current_path)){
-            System.out.println("cd: "+new_current_path.toString()+": No such file or directory");
+            System.out.println("cd: "+new_current_path+": No such file or directory");
             return;
         }
 
@@ -98,56 +104,76 @@ public class Main {
         //parameter_parser.getParameterList().stream().forEach(System.out::println);
     }
 
-    static void main(String[] args) throws Exception {
-        scanner = new Scanner(System.in);
-        boolean alive = true;
-        do {
-            System.out.print("$ ");
-            input = scanner.nextLine();
-            //ParameterParser.split_raw_input(input);
-            String[] input_raw = ParameterParser.split_raw_input(input);
-            command = input_raw[0];
-            parameter = (input_raw.length != 1) ? input_raw[1]: "";
-            parameter_parser.parse(parameter);
-            switch (command) {
-                case "exit":
-                    alive = false;
-                    break;
-                case "pwd":
-                    System.out.println(working_directory());
-                    break;
-                case "cd":
-                    change_directory(parameter);
-                    break;
-                case "echo":
-                    echo_command();
-                    break;
-                case "type":
-                    type_command(parameter.toLowerCase());
-                    break;
-                default:
-                    command_parser.parse(command);
-                    command = command_parser.getParameterString().toString();
-                    try{
-                        String[] parameter_array = ParameterParser.split_redirection_parameter(parameter);
-                        FileProcessor.redirect(command, parameter_array);
-                    } catch (IllegalThreadStateException e){
-                        System.out.println(e.getMessage());
-                    } catch (InterruptedException e){
-                        System.out.println("Interrupted");
-                    } catch (NoSuchElementException e){
-                        System.out.println(e.getMessage());
-                    } catch (RuntimeException e) {
-                        Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
-                        if (file.equals(Optional.empty())) {
-                            System.out.println(command + ": command not found");
-                            continue;
-                        }
-                        Process process = FileProcessor.run_program(command, parameter_parser.getParameterList());
-                        FileProcessor.print_output_from_file(process);
+    static void handle_main_command() throws IOException {
+        switch (command) {
+            case "pwd":
+                System.out.println(working_directory());
+                break;
+            case "cd":
+                change_directory(parameter);
+                break;
+            case "echo":
+                echo_command();
+                break;
+            case "type":
+                type_command(parameter.toLowerCase());
+                break;
+            default:
+                command_parser.parse(command);
+                command = command_parser.getParameterString().toString();
+                try{
+                    String[] parameter_array = ParameterParser.split_redirection_parameter(parameter);
+                    FileProcessor.redirect(command, parameter_array);
+                } catch (IllegalThreadStateException e){
+                    System.out.println(e.getMessage());
+                } catch (InterruptedException e){
+                    System.out.println("Interrupted");
+                } catch (NoSuchElementException e){
+                    System.out.println(e.getMessage());
+                } catch (RuntimeException e) {
+                    Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
+                    if (file.equals(Optional.empty())) {
+                        System.out.println(command + ": command not found");
+                        break;
                     }
+                    Process process = FileProcessor.run_program(command, parameter_parser.getParameterList());
+                    FileProcessor.print_output_from_file(process);
                     break;
-            }
-        }while(alive);
+                }
+        }
+    }
+
+    void main(String[] args){
+        try {
+            DefaultParser parser = new DefaultParser();
+            parser.setEscapeChars(new char[0]);
+            StringsCompleter completer = new StringsCompleter(Arrays.asList("echo","exit"));
+
+            Terminal terminal = TerminalBuilder.builder().system(true).build();
+            LineReader reader = LineReaderBuilder.builder()
+                    .terminal(terminal)
+                    .completer(completer)
+                    .parser(parser)
+                    .build();
+
+            do {
+                input = reader.readLine("$ ");
+                String[] input_raw = ParameterParser.split_raw_input(input);
+                command = input_raw[0];
+                parameter = (input_raw.length != 1) ? input_raw[1] : "";
+                parameter_parser.parse(parameter);
+
+                if ("exit".equalsIgnoreCase(input)) {
+                    break;
+                }
+
+                handle_main_command();
+
+                terminal.flush();
+            } while (true);
+                terminal.close();
+        } catch (IOException e) {
+            System.err.println("Error creating terminal: " + e.getMessage());
+        }
     }
 }
