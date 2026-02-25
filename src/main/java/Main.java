@@ -27,7 +27,7 @@ public class Main {
 
     // used in the type command
     private static String type_command_file_finder(String command) {
-        Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
+        Optional<Path> file = FileProcessor.get_executable_file_in_PATH(command);
         return file.map(path -> command + " is " + path).orElseGet(() -> command + ": not found");
     }
 
@@ -91,7 +91,7 @@ public class Main {
         String[] parameter_array = null;
         try{
             parameter_array = ParameterParser.split_redirection_parameter(parameter);
-            FileProcessor.redirect(command ,parameter_array);
+            RedirectionHandler.redirect(command ,parameter_array);
         } catch (NoSuchFileException e){
             System.out.println(command +": "+ e.getMessage());
         } catch (IllegalThreadStateException e){
@@ -125,7 +125,7 @@ public class Main {
                 command = command_parser.getParameterString().toString();
                 try{
                     String[] parameter_array = ParameterParser.split_redirection_parameter(parameter);
-                    FileProcessor.redirect(command, parameter_array);
+                    RedirectionHandler.redirect(command, parameter_array);
                 } catch (IllegalThreadStateException e){
                     System.out.println(e.getMessage());
                 } catch (InterruptedException e){
@@ -133,7 +133,7 @@ public class Main {
                 } catch (NoSuchElementException e){
                     System.out.println(e.getMessage());
                 } catch (RuntimeException e) {
-                    Optional<Path> file = FileProcessor.find_executable_file_in_PATH(command);
+                    Optional<Path> file = FileProcessor.get_executable_file_in_PATH(command);
                     if (file.equals(Optional.empty())) {
                         System.out.println(command + ": command not found");
                         break;
@@ -143,6 +143,10 @@ public class Main {
                     break;
                 }
         }
+    }
+
+    static void handle_tabs(){
+
     }
 
     void main(String[] args){
