@@ -1,6 +1,8 @@
+import org.jline.builtins.Completers;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.impl.DefaultParser;
+import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
@@ -147,7 +149,13 @@ public class Main {
         try {
             DefaultParser parser = new DefaultParser();
             parser.setEscapeChars(new char[0]);
-            StringsCompleter completer = new StringsCompleter(Arrays.asList("echo","exit"));
+            List<String> completer_string = new LinkedList<>();
+            completer_string.add("echo");
+            completer_string.add("exit");
+            FileProcessor.get_executable_files().stream().map(file -> file.getFileName().toString()).forEach(completer_string::add);
+            AggregateCompleter completer = new AggregateCompleter(
+                    new StringsCompleter(completer_string),
+                    new Completers.FilesCompleter(Paths.get("PATH")));
 
             Terminal terminal = TerminalBuilder.builder().system(true).build();
             LineReader reader = LineReaderBuilder.builder()
