@@ -61,41 +61,4 @@ public class PathExecutableCompleter implements Completer {
         firstTab = true;
         lastPrefix = prefix;
     }
-
-    /*
-    @Override
-    public void complete(LineReader reader,
-                         ParsedLine line,
-                         List<Candidate> candidates) {
-
-        String prefix = line.word();
-
-        Set<String> matches = new HashSet<>();
-
-        String pathEnv = System.getenv("PATH");
-        String[] paths = pathEnv.split(File.pathSeparator);
-
-        for (String path : paths) {
-
-            File dir = new File(path);
-            File[] files = dir.listFiles();
-
-            if (files == null) continue;
-
-            for (File f : files) {
-
-                if (f.canExecute() && f.getName().startsWith(prefix)) {
-                    matches.add(f.getName());
-                }
-
-            }
-        }
-
-        List<String> sorted = new ArrayList<>(matches);
-        Collections.sort(sorted);
-
-        for (String match : sorted) {
-            candidates.add(new Candidate(match));
-        }
-    }*/
 }

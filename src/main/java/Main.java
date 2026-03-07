@@ -158,7 +158,6 @@ public class Main {
             List<String> completer_string = new LinkedList<>();
             completer_string.add("echo");
             completer_string.add("exit");
-            //FileProcessor.get_executable_files().stream().map(file -> file.getFileName().toString()).forEach(completer_string::add);
             AggregateCompleter completer = new AggregateCompleter(
                     new StringsCompleter(completer_string),
                     new PathExecutableCompleter());
@@ -169,7 +168,6 @@ public class Main {
                     .completer(completer)
                     .parser(parser)
                     .build();
-            //reader.setOpt(LineReader.Option.LIST_AMBIGUOUS);
 
             do {
                 input = reader.readLine("$ ");
