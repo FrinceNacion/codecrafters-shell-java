@@ -158,20 +158,18 @@ public class Main {
             List<String> completer_string = new LinkedList<>();
             completer_string.add("echo");
             completer_string.add("exit");
-            FileProcessor.get_executable_files().stream().map(file -> file.getFileName().toString()).forEach(completer_string::add);
+            //FileProcessor.get_executable_files().stream().map(file -> file.getFileName().toString()).forEach(completer_string::add);
             AggregateCompleter completer = new AggregateCompleter(
                     new StringsCompleter(completer_string),
-                    new Completers.FilesCompleter(Paths.get("PATH")));
+                    new PathExecutableCompleter());
 
             Terminal terminal = TerminalBuilder.builder().system(true).build();
             LineReader reader = LineReaderBuilder.builder()
                     .terminal(terminal)
-                    .completer(new PathExecutableCompleter())
+                    .completer(completer)
                     .parser(parser)
                     .build();
-            reader.setOpt(LineReader.Option.LIST_AMBIGUOUS);
-            reader.unsetOpt(LineReader.Option.AUTO_LIST);
-            reader.unsetOpt(LineReader.Option.AUTO_MENU);
+            //reader.setOpt(LineReader.Option.LIST_AMBIGUOUS);
 
             do {
                 input = reader.readLine("$ ");
