@@ -1,6 +1,8 @@
 import org.jline.builtins.Completers;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.ParsedLine;
+import org.jline.reader.Reference;
 import org.jline.reader.impl.DefaultParser;
 import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
@@ -164,9 +166,12 @@ public class Main {
             Terminal terminal = TerminalBuilder.builder().system(true).build();
             LineReader reader = LineReaderBuilder.builder()
                     .terminal(terminal)
-                    .completer(completer)
+                    .completer(new PathExecutableCompleter())
                     .parser(parser)
                     .build();
+            reader.setOpt(LineReader.Option.LIST_AMBIGUOUS);
+            reader.unsetOpt(LineReader.Option.AUTO_LIST);
+            reader.unsetOpt(LineReader.Option.AUTO_MENU);
 
             do {
                 input = reader.readLine("$ ");

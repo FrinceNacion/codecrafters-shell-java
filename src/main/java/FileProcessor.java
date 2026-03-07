@@ -7,17 +7,22 @@ import java.util.stream.Stream;
 public class FileProcessor {
     static String[] path_environment_directories = System.getenv("PATH").split(File.pathSeparator);
 
-    private static List<Path> find_executable_files_by_prefix(Path directory, String prefix){
-        List<Path> result = new LinkedList<>();
-        try (Stream<Path> stream = Files.list(directory)) {
-            stream.filter(Files::isRegularFile)
-                    .filter(Files::isExecutable)
-                    .filter(files -> files.getFileName().toString().startsWith(prefix))
+    public static List<String> find_executable_files_by_prefix(String prefix){
+
+        List<String> result = new LinkedList<>();
+        for (String path : path_environment_directories){
+            File dir = new File(path);
+            File[] files = dir.listFiles();
+
+            if (files == null){continue;}
+
+            Arrays.stream(files)
+                    .filter(File::canExecute)
+                    .filter(file -> file.getName().startsWith(prefix))
+                    .map(File::getName)
                     .forEach(result::add);
-            return  result;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
+        return result;
     }
 
     private static List<Path> find_all_executable_files(Path directory){
