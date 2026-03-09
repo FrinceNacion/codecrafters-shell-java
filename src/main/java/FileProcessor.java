@@ -46,7 +46,6 @@ public class FileProcessor {
             }
 
             find_all_executable_files(current_path).stream().forEach(result::add);
-            if (!result.equals(Optional.empty())){break;}
         }
         return result;
     }

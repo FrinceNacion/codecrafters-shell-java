@@ -1,5 +1,4 @@
 import org.jline.reader.*;
-import java.io.File;
 import java.util.*;
 
 public class PathExecutableCompleter implements Completer {
@@ -19,6 +18,7 @@ public class PathExecutableCompleter implements Completer {
 
         List<String> matches = FileProcessor.find_executable_files_by_prefix(prefix);
 
+
         if (matches.size() <= 1) {
             // Normal completion
             for (String m : matches) {
@@ -28,6 +28,14 @@ public class PathExecutableCompleter implements Completer {
             lastPrefix = prefix;
             return;
         }
+
+        String longest_common_prefix = "";
+        for (String m : matches){
+            if (longest_common_prefix.isEmpty()){
+                longest_common_prefix = m;
+            }
+        }
+
 
         if (firstTab) {
             // Ring bell

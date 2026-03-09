@@ -1,8 +1,5 @@
-import org.jline.builtins.Completers;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.ParsedLine;
-import org.jline.reader.Reference;
 import org.jline.reader.impl.DefaultParser;
 import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
@@ -18,7 +15,6 @@ import java.util.*;
 
 
 public class Main {
-    static Scanner scanner;
     static String input;
     static ParameterParser parameter_parser = new ParameterParser();
     static ParameterParser command_parser = new ParameterParser();
