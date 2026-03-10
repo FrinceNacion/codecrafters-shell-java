@@ -3,7 +3,7 @@ import java.util.*;
 
 public class PathExecutableCompleter implements Completer {
 
-    private String lastPrefix = new String();
+    private String lastPrefix = "";
     private boolean firstTab = true;
     private List<String> cachedMatches = new ArrayList<>();
 
@@ -34,7 +34,6 @@ public class PathExecutableCompleter implements Completer {
                 c = m;
                 //System.out.println("New: "+c);
             }
-            //System.out.println("------");
         }
         lastPrefix = c;
         return c;
@@ -51,24 +50,31 @@ public class PathExecutableCompleter implements Completer {
 
         List<String> matches = FileProcessor.find_executable_files_by_prefix(prefix);
 
-
         if (matches.size() <= 1) {
             // Normal completion
-            for (String m : matches) {
-                candidates.add(new Candidate(m));
+            for (String match : matches) {
+                candidates.add(new Candidate(match));
             }
             firstTab = true;
             lastPrefix = prefix;
             return;
         }
 
-        candidates.add(new Candidate(lcp(matches, prefix)));
-
-
         if (firstTab) {
             // Ring bell
             reader.getTerminal().writer().print("\u0007");
             reader.getTerminal().flush();
+
+            String lcp = lcp(matches, prefix).stripTrailing();
+            candidates.add(new Candidate(
+                    lcp,
+                    lcp,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false
+            ));;
 
             cachedMatches = matches;
             firstTab = false;
