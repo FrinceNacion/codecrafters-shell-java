@@ -26,6 +26,7 @@ public class PathExecutableCompleter implements Completer {
                 continue;
             }
             if (prev_pref == 0){
+                System.out.println("Encountered: "+prev_pref);
                 prev_pref = c.length();
             }
             // if prev lcp is greater than current lcp, then curr lcp is next candidate
@@ -60,21 +61,22 @@ public class PathExecutableCompleter implements Completer {
             return;
         }
 
+        String lcp = lcp(matches, prefix).stripTrailing();
+        candidates.add(new Candidate(
+                lcp,
+                lcp,
+                null,
+                null,
+                null,
+                null,
+                false
+        ));
+        //prefix = line.word();
+
         if (firstTab) {
             // Ring bell
             reader.getTerminal().writer().print("\u0007");
             reader.getTerminal().flush();
-
-            String lcp = lcp(matches, prefix).stripTrailing();
-            candidates.add(new Candidate(
-                    lcp,
-                    lcp,
-                    null,
-                    null,
-                    null,
-                    null,
-                    false
-            ));;
 
             cachedMatches = matches;
             firstTab = false;
