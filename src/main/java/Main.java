@@ -88,7 +88,7 @@ public class Main {
     private static void echo_command() {
         String[] parameter_array = null;
         try{
-            parameter_array = ParameterParser.split_redirection_parameter(parameter);
+            parameter_array = ParameterParser.split_parameter(parameter);
             RedirectionHandler.redirect(command ,parameter_array);
         } catch (NoSuchFileException e){
             System.out.println(command +": "+ e.getMessage());
@@ -122,7 +122,7 @@ public class Main {
                 command_parser.parse(command);
                 command = command_parser.getParameterString().toString();
                 try{
-                    String[] parameter_array = ParameterParser.split_redirection_parameter(parameter);
+                    String[] parameter_array = ParameterParser.split_parameter(parameter);
                     RedirectionHandler.redirect(command, parameter_array);
                 } catch (IllegalThreadStateException e){
                     System.out.println(e.getMessage());

@@ -47,8 +47,8 @@ public class RedirectionHandler {
         ParameterParser parameterParser = new ParameterParser();
         Process process;
 
-        String executable_parameter = parameter_array[0];
-        String output_parameter = parameter_array[1].strip();
+        String executable_parameter = parameter_array[ParameterParser.EXECUTABLE_COMMAND_PARAMETER];
+        String output_parameter = parameter_array[ParameterParser.EXECUTABLE_OUTPUT_PARAMETER].strip();
 
         Path output_path = Path.of(output_parameter);
         Path output_parent = Main.current_directory, output_file = output_path.getFileName();
@@ -117,8 +117,8 @@ public class RedirectionHandler {
         ParameterParser parameterParser = new ParameterParser();
         Process process;
 
-        String executable_parameter = parameter_array[0];
-        String output_parameter = parameter_array[1].strip();
+        String executable_parameter = parameter_array[ParameterParser.EXECUTABLE_COMMAND_PARAMETER];
+        String output_parameter = parameter_array[ParameterParser.EXECUTABLE_OUTPUT_PARAMETER].strip();
 
         Path output_path = Path.of(output_parameter);
         Path output_parent = Main.current_directory, output_file = output_path.getFileName();
@@ -155,7 +155,7 @@ public class RedirectionHandler {
     }
 
     public static void redirect(String command, String[] parameter_array) throws IOException, InterruptedException {
-        String redirect_type = parameter_array[2];
+        String redirect_type = parameter_array[ParameterParser.COMMAND_OPERATOR];
         if (redirect_type.equals(">") || redirect_type.equals("1>")){
             redirect_stdout(command, parameter_array, false);
         } else if (redirect_type.equals("2>")){

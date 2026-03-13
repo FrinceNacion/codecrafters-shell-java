@@ -9,9 +9,13 @@ public class ParameterParser {
     private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n"};
     private static final String[] redirection_commands = {" 1> ", "\s>\s", " 2> ", " 1>> ", " >> ", " 2>> "};
 
+    public static final int EXECUTABLE_COMMAND_PARAMETER = 0;
+    public static final int EXECUTABLE_OUTPUT_PARAMETER = 1;
+    public static final int COMMAND_OPERATOR = 2;
+
     // Splits the parameters to 3 section and validate for redirection
     // if validation fails, it returns null or an error if encountered.
-    public static String[] split_redirection_parameter(String parameter) throws ArrayIndexOutOfBoundsException{
+    public static String[] split_parameter(String parameter) throws ArrayIndexOutOfBoundsException{
         String[] parameter_list = new String[3];
         int index = -1;
 
@@ -28,16 +32,11 @@ public class ParameterParser {
         }
 
         String executable_parameter = parameter.substring(0, index);
-        String output_parameter = parameter.substring(index).stripLeading().split(" ", 2)[1];
+        String output_parameter = parameter.substring(index).stripLeading().split(" ", 2)[EXECUTABLE_OUTPUT_PARAMETER];
 
-        /**boolean is_command_present_or_valid = Arrays.asList(redirection_commands).contains(command);
-        if (!is_command_present_or_valid){
-            return null;
-        }**/
-
-        parameter_list[0] = executable_parameter;
-        parameter_list[1] = output_parameter;
-        parameter_list[2] = parameter.substring(index).stripLeading().split(" ", 2)[0];
+        parameter_list[EXECUTABLE_COMMAND_PARAMETER] = executable_parameter;
+        parameter_list[EXECUTABLE_OUTPUT_PARAMETER] = output_parameter;
+        parameter_list[COMMAND_OPERATOR] = parameter.substring(index).stripLeading().split(" ", 2)[0];
 
         return parameter_list;
     }
