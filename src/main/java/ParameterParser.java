@@ -7,7 +7,7 @@ public class ParameterParser {
     private final StringBuilder parameterString = new StringBuilder();
     private static final int id_num = new Random().nextInt();
     private static final String[] escapable_characters = {"\\", "$", "\"", "`", "\n"};
-    private static final String[] redirection_commands = {" 1> ", "\s>\s", " 2> ", " 1>> ", " >> ", " 2>> "};
+    private static final String[] redirection_commands = {" 1> ", "\s>\s", " 2> ", " 1>> ", " >> ", " 2>> ", " | "};
 
     public static final int EXECUTABLE_COMMAND_PARAMETER = 0;
     public static final int EXECUTABLE_OUTPUT_PARAMETER = 1;
