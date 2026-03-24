@@ -1,42 +1,38 @@
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class RedirectionHandler {
 
-    private static void stdout(Process process, Path output_path, Optional<String> string_output, boolean is_append) throws IOException, InterruptedException {
-        ByteArrayOutputStream to_write = new ByteArrayOutputStream();
-        to_write.write("".getBytes());
-
-
-        if (is_append && Files.exists(output_path)){
-            to_write.write(Files.readAllBytes(output_path));
-            if (!to_write.toString().endsWith("\n")){
-                to_write.write("\n".getBytes());
-            }
-        }
-
+    private static void stdout(Process process, OutputStream output_target, Optional<String> string_output, boolean is_append) throws IOException, InterruptedException {
         if (string_output.isPresent()){
-            to_write.write(string_output.get().getBytes());
-            Files.write(output_path,to_write.toByteArray());
+            output_target.write(string_output.get().getBytes(StandardCharsets.UTF_8));
+            output_target.flush();
             return;
         }
 
-        to_write.write(process.getInputStream().readAllBytes());
-        Files.write(output_path,to_write.toByteArray());
-        int exit_value = process.waitFor();
-        if (exit_value != 0){
-            String error = new String(process.getErrorStream().readAllBytes());
-            if (error.isEmpty()){
-                return;
-            }
-            throw new IllegalThreadStateException(error.strip());
+        try(InputStream input_stream = process.getInputStream()){
+            input_stream.transferTo(output_target);
         }
 
+        int exit_value = process.waitFor();
+
+        if (exit_value != 0){
+            String error = new String(process.getErrorStream().readAllBytes());
+            if (!error.isEmpty()){
+                throw new IllegalThreadStateException(error.strip());
+            }
+        }
+
+        output_target.flush();
     }
 
     public static void redirect_stdout(String command,String[] parameter_array, boolean is_append) throws IOException, IllegalThreadStateException, InterruptedException {
@@ -67,7 +63,12 @@ public class RedirectionHandler {
         if (in_qoutes){
             parameterParser.parse(executable_parameter);
             String output_string = parameterParser.getParameterString().toString();
-            stdout(null, output_path, Optional.of(output_string), is_append);
+            try (OutputStream file = Files.newOutputStream(
+                    output_path,
+                    is_append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE
+            )) {
+                stdout(null, file, Optional.of(output_string), is_append);
+            }
             return;
         }
 
@@ -85,7 +86,12 @@ public class RedirectionHandler {
         }
 
         process = FileProcessor.run_program(command, parameters);
-        stdout(process, output_path, Optional.empty(), is_append);
+        try (OutputStream file = Files.newOutputStream(
+                output_path,
+                is_append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE
+        )) {
+            stdout(process, file, Optional.empty(), is_append);
+        }
     }
 
     private static void stderr(Process process, Path output_path, Optional<String> string_output, boolean is_append) throws IOException, InterruptedException {
