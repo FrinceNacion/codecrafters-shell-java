@@ -170,6 +170,8 @@ public class RedirectionHandler {
             redirect_stdout(command, parameter_array, true);
         } else if (redirect_type.equals("2>>")){
             redirect_stderr(command, parameter_array, true);
+        } else if (redirect_type.equals("|")){
+            PipelineHandler.pipe(command, parameter_array);
         } else{
             System.out.println("Type of redirect not detected");
         }
