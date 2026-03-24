@@ -22,5 +22,6 @@ public class PipelineHandler {
         Process main_command_process = FileProcessor.run_program(executable_command.toString(), parameter_parser.getParameterList());
 
         // TODO: Handle pipeline.
+
     }
 }
